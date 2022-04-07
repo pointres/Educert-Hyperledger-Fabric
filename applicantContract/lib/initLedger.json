@@ -1,0 +1,28 @@
+[
+    {
+        "applicantId" :"1814073", 
+        "email":"yash@deorah.com",
+        "name":"Yash Deorah",
+        "address":"kalyan",
+        "pin":"421103",
+        "state":"Maharashtra",
+        "country":"India",
+        "contact":"1234567077",
+        "dateOfBirth":"12/11/2000",
+        "documents":[],
+        "permissionGranted":["orgid1"]
+    },
+    {
+        "applicantId" :"1814078", 
+        "email":"sanyam@gandhi.com",
+        "name":"Sanyam Gandhi",
+        "address":"kalyan",
+        "pin":"400001",
+        "state":"Maharashtra",
+        "country":"India",
+        "contact":"788779888",
+        "dateOfBirth":"23/11/2000",
+        "documents":[],
+        "permissionGranted":["orgid1"]
+    }   
+]
