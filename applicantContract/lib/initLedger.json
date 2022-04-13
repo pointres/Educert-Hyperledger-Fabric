@@ -2,6 +2,7 @@
     {
         "applicantId" :"1814073", 
         "email":"yash@deorah.com",
+        "passowrd":"#1234567890",
         "name":"Yash Deorah",
         "address":"kalyan",
         "pin":"421103",
@@ -10,11 +11,13 @@
         "contact":"1234567077",
         "dateOfBirth":"12/11/2000",
         "documents":[],
-        "permissionGranted":["orgid1"]
-    },
+        "permissionGranted":["orgid1"],
+        "currentOrganization":"orgid1"
+        },
     {
         "applicantId" :"1814078", 
         "email":"sanyam@gandhi.com",
+        "passowrd":"#1234567890",
         "name":"Sanyam Gandhi",
         "address":"kalyan",
         "pin":"400001",
@@ -23,6 +26,7 @@
         "contact":"788779888",
         "dateOfBirth":"23/11/2000",
         "documents":[],
-        "permissionGranted":["orgid1"]
+        "permissionGranted":["orgid2"],
+        "currentOrganization":"orgid2"
     }   
 ]

@@ -1,36 +1,43 @@
+/**
+ * @author Varsha Kamath
+ * @email varsha.kamath@stud.fra-uas.de
+ * @create date 2021-01-23 21:50:38
+ * @modify date 2021-01-30 19:52:41
+ * @desc [Primary Smartcontract to initiate ledger with applicant details]
+ */
 /*
- * Copyright IBM Corp. All Rights Reserved.
- *
  * SPDX-License-Identifier: Apache-2.0
  */
-
 'use strict';
 
 const { Contract } = require('fabric-contract-api');
-let initApplicant = require('./initLedger.json');
+let Applicant = require('./Applicant.js');
+let initApplicants = require('./initLedger.json');
 
 class PrimaryContract extends Contract {
 
     async initLedger(ctx) {
         console.info('============= START : Initialize Ledger ===========');
-        for (let i = 0; i < initApplicant.length; i++) {
-            initApplicant[i].docType = 'patient';
-            await ctx.stub.putState('PID' + i, Buffer.from(JSON.stringify(initApplicant[i])));
-            console.info('Added <--> ', initApplicant[i]);
+        for (let i = 0; i < initApplicants.length; i++) {
+            await ctx.stub.putState(initApplicants[i].applicantId, Buffer.from(JSON.stringify(initApplicants[i])));
+            console.info('Added <--> ', initApplicants[i]);
         }
         console.info('============= END : Initialize Ledger ===========');
     }
-   async readApplicant(ctx, aId) {
-        const exists = await this.applicantExists(ctx, aId);
+
+    //read applicant details based on applicantId
+    async getApplicant(ctx, applicantId) {
+        const exists = await this.applicantExists(ctx, applicantId);
         if (!exists) {
-            throw new Error(`The applicant ${aId} does not exist`);
+            throw new Error(`The applicant ${applicantId} does not exist`);
         }
 
-        const buffer = await ctx.stub.getState(aId);
+        const buffer = await ctx.stub.getState(applicantId);
         let asset = JSON.parse(buffer.toString());
         asset = ({
-            applicantId: asset.applicantId,
+            applicantId: applicantId,
             email : asset.email,
+            password : asset.password,
             name : asset.name,
             address : asset.address,
             pin : asset.pin,
@@ -38,25 +45,27 @@ class PrimaryContract extends Contract {
             country : asset.country,
             contact : asset.contact,
             dateOfBirth : asset.dateOfBirth,
-            documents : asset.documents,
+            documentId : asset.documentId,
+            document : asset.document,
             permissionGranted : asset.permissionGranted,
-            currentOrganization : asset.currentOrganization
+            updatedBy : asset.updatedBy,
         });
         return asset;
     }
-   async applicantExists(ctx, aId) {
-        const buffer = await ctx.stub.getState(aId);
+
+    async applicantExists(ctx, applicantId) {
+        const buffer = await ctx.stub.getState(applicantId);
         return (!!buffer && buffer.length > 0);
     }
-    
-   async getQueryResultForQueryString(ctx, queryString) {
+
+    async getQueryResultForQueryString(ctx, queryString) {
         let resultsIterator = await ctx.stub.getQueryResult(queryString);
         console.info('getQueryResultForQueryString <--> ', resultsIterator);
         let results = await this.getAllApplicantResults(resultsIterator, false);
         return JSON.stringify(results);
     }
 
-   async getAllApplicantResults(iterator, isHistory) {
+    async getAllApplicantResults(iterator, isHistory) {
         let allResults = [];
         while (true) {
             let res = await iterator.next();
@@ -87,5 +96,4 @@ class PrimaryContract extends Contract {
         }
     }
 }
-
 module.exports = PrimaryContract;

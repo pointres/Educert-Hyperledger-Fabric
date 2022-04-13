@@ -1,62 +1,38 @@
-/*
- * Copyright IBM Corp. All Rights Reserved.
- *
- * SPDX-License-Identifier: Apache-2.0
- */
-
 'use strict';
 
 const { Contract } = require('fabric-contract-api');
-let initApplicant = require('./initLedger.json');
+let initDocument = require('./initLedger.json');
 
 class PrimaryContract extends Contract {
 
     async initLedger(ctx) {
         console.info('============= START : Initialize Ledger ===========');
-        for (let i = 0; i < initApplicant.length; i++) {
-            initApplicant[i].docType = 'patient';
-            await ctx.stub.putState('PID' + i, Buffer.from(JSON.stringify(initApplicant[i])));
-            console.info('Added <--> ', initApplicant[i]);
+        for (let i = 0; i < initDocument.length; i++) {
+            initDocument[i].docType = 'document';
+            await ctx.stub.putState('DID' + i, Buffer.from(JSON.stringify(initDocument[i])));
+            console.info('Added <--> ', initDocument[i]);
         }
         console.info('============= END : Initialize Ledger ===========');
     }
-   async readApplicant(ctx, aId) {
-        const exists = await this.applicantExists(ctx, aId);
-        if (!exists) {
-            throw new Error(`The applicant ${aId} does not exist`);
+   async readDocument(ctx, dId) {
+        const exists = await ctx.stub.getState(aId);
+        if (!exists || exists.length == 0) {
+            throw new Error(`The document ${aId} does not exist`);
         }
 
         const buffer = await ctx.stub.getState(aId);
         let asset = JSON.parse(buffer.toString());
-        asset = ({
-            applicantId: asset.applicantId,
-            email : asset.email,
-            name : asset.name,
-            address : asset.address,
-            pin : asset.pin,
-            state : asset.state,
-            country : asset.country,
-            contact : asset.contact,
-            dateOfBirth : asset.dateOfBirth,
-            documents : asset.documents,
-            permissionGranted : asset.permissionGranted,
-            currentOrganization : asset.currentOrganization
-        });
         return asset;
     }
-   async applicantExists(ctx, aId) {
-        const buffer = await ctx.stub.getState(aId);
-        return (!!buffer && buffer.length > 0);
-    }
     
-   async getQueryResultForQueryString(ctx, queryString) {
+    async getQueryResultForQueryString(ctx, queryString) {
         let resultsIterator = await ctx.stub.getQueryResult(queryString);
         console.info('getQueryResultForQueryString <--> ', resultsIterator);
-        let results = await this.getAllApplicantResults(resultsIterator, false);
+        let results = await this.getAllDocumentResults(resultsIterator, false);
         return JSON.stringify(results);
     }
-
-   async getAllApplicantResults(iterator, isHistory) {
+    
+    async getAllDocumentResults(iterator, isHistory) {
         let allResults = [];
         while (true) {
             let res = await iterator.next();
