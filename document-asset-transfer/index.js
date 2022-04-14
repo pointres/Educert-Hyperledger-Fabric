@@ -1,5 +1,5 @@
 //const PrimaryContract = require('./lib/primaryContract.js');
 //const OrganizationContract = require('./lib/organizationContract.js');
-const ApplicantContract = require('./lib/ApplicantContract.js');
+const DocumentContract = require('./lib/DocumentContract.js');
 
-module.exports.contracts = [ApplicantContract];
+module.exports.contracts = [DocumentContract];

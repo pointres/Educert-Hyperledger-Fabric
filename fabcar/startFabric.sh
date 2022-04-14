@@ -39,7 +39,7 @@ pushd ../test-network
 ./network.sh down
 ./network.sh up createChannel -ca -s couchdb
 ./network.sh deployCC -ccn applicant-asset-transfer -ccv 1 -cci initLedger -ccl ${CC_SRC_LANGUAGE} -ccp ${CC_SRC_PATH}
-#./network.sh deployCC -ccn documentContract -ccv 1 -cci initLedger -ccl ${CC_SRC_LANGUAGE} -ccp "../documentContract/"
+./network.sh deployCC -ccn document-asset-transfer -ccv 1 -cci initLedger -ccl ${CC_SRC_LANGUAGE} -ccp "../document-asset-transfer/"
 popd
 
 cat <<EOF

@@ -43,8 +43,25 @@ async function main() {
         // Evaluate the specified transaction.
         // queryCar transaction - requires 1 argument, ex: ('queryCar', 'CAR4')
         // queryAllCars transaction - requires no arguments, ex: ('queryAllCars')
-        const result = await contract.evaluateTransaction('getApplicant',"1814073");
+        const result = await contract.submitTransaction('addDocumentIdToArray',"1814073","docid1","Ujwalbhawishya");
         console.log(`Transaction has been evaluated, result is: ${result.toString()}`);
+
+        const documentContract = network.getContract('document-asset-transfer');
+
+        // Evaluate the specified transaction.
+        // queryCar transaction - requires 1 argument, ex: ('queryCar', 'CAR4')
+        // queryAllCars transaction - requires no arguments, ex: ('queryAllCars')
+        const result2 = await contract.evaluateTransaction('getApplicant',"1814073");
+        console.log(`Transaction has been evaluated, result is: ${result2.toString()}`);
+
+        const result3 = await documentContract.evaluateTransaction('getAllDocuments');
+        console.log(`Transaction has been evaluated, result is: ${result3.toString()}`)
+
+        const result4 = await documentContract.submitTransaction('verifyDocument',"docid2", "Zinkronte");
+        console.log(`Transaction has been evaluated, result is: ${result4.toString()}`)
+
+        const result5 = await documentContract.evaluateTransaction('getAllDocuments');
+        console.log(`Transaction has been evaluated, result is: ${result5.toString()}`)
 
         // Disconnect from the gateway.
         await gateway.disconnect();

@@ -14,7 +14,8 @@
         "percentage":"50",
         "outOfPercentage":"100",
         "status":"Verified" ,
-        "documentUrl" : "D:\\Practice\\Mega Proj\\Educert\\React\\MegaProject\\template\\cert.PNG"
+        "documentUrl" : "D:\\Practice\\Mega Proj\\Educert\\React\\MegaProject\\template\\cert.PNG",
+        "updatedBy":"Teacher_1"
     },
     {
         "documentId":"docid2", 
@@ -30,7 +31,8 @@
         "tenure":"4",
         "percentage":"8.34",
         "outOfPercentage":"10",
-        "status":"Verified",
-        "documentUrl" : "D:\\Practice\\Mega Proj\\Educert\\React\\MegaProject\\template\\cert.PNG"
+        "status":"Self-Uploaded",
+        "documentUrl" : "D:\\Practice\\Mega Proj\\Educert\\React\\MegaProject\\template\\cert.PNG",
+        "updatedBy":"Teacher_2"
     }
 ]

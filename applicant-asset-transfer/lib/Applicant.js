@@ -3,7 +3,7 @@ const crypto = require('crypto');
 
 class Applicant {
 
-    constructor(applicantId , email , password, name , address , pin , state , country , contact , dateOfBirth, documentId, document)
+    constructor(applicantId , email , password, name , address , pin , state , country , contact , dateOfBirth, currentOrganization, updatedBy)
     {
         this.applicantId = applicantId
         this.email = email,
@@ -15,10 +15,10 @@ class Applicant {
         this.country = country,
         this.contact = contact,
         this.dateOfBirth = dateOfBirth,
-        this.documentId = documentId,
-        this.document = document,
-        this.permissionGranted= [],
-        this.updatedBy = this.updatedBy
+        this.documentIds = [],
+        this.currentOrganization = currentOrganization,
+        this.permissionGranted= [currentOrganization],
+        this.updatedBy = updatedBy
         return this;
     }
 }

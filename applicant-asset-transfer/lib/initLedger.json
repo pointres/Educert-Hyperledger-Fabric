@@ -10,8 +10,8 @@
         "country":"India",
         "contact":"1234567077",
         "dateOfBirth":"12/11/2000",
-        "documentId":"",
-        "document":{},
+        "documentIds":[],
+        "currentOrganization":"org1",
         "permissionGranted":["org1"],
         "updatedBy":"initLedger"
     },
@@ -26,8 +26,8 @@
         "country":"India",
         "contact":"788779888",
         "dateOfBirth":"23/11/2000",
-        "documentId":"",
-        "document":{},
+        "documentIds":[],
+        "currentOrganization":"org2",
         "permissionGranted":["org2"],
         "updatedBy":"initLedger"
     }   
