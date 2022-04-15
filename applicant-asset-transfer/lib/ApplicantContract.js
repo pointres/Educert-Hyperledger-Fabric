@@ -176,15 +176,15 @@ class ApplicantContract extends Contract {
         const applicant = await this.getApplicant(ctx, applicantId);
         if (!applicant.documentIds.includes(documentId)) {
             applicant.documentIds.push(documentId);
+            applicant.updatedBy = updatedBy;
+            const buffer = Buffer.from(JSON.stringify(applicant));
+            await ctx.stub.putState(applicantId, buffer);
         }
-        applicant.updatedBy = updatedBy;
-        const buffer = Buffer.from(JSON.stringify(applicant));
-        await ctx.stub.putState(applicantId, buffer);
     }
 
 
     async getPermissionedApplicant(ctx, applicantId, organizationId){
-        let applicant = await this.getApplicant(applicantId);
+        let applicant = await this.getApplicant(ctx, applicantId);
         
         if(applicant.permissionGranted.includes(organizationId)){
             return this.fetchLimitedFieldsForOrganization(applicant);
@@ -207,7 +207,7 @@ class ApplicantContract extends Contract {
     async getAllApplicants(ctx) {
         let resultsIterator = await ctx.stub.getStateByRange('', '');
         let asset = await this.getAllApplicantResults(resultsIterator, false);
-        return this.fetchLimitedFields(asset);
+        return this.fetchLimitedFieldsForOrganization(asset);
     }
 
     async getApplicantHistory(ctx, applicantId) {

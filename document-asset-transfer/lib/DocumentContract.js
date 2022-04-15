@@ -39,7 +39,7 @@ class DocumentContract extends Contract {
     }
 
     async getPermissionedDocument(ctx, documentId){
-        let document = await this.getDocument(documentId);
+        let document = await this.getDocument(ctx, documentId);
         
         return this.fetchLimitedFieldsForDocument(document);
     }
@@ -50,25 +50,26 @@ class DocumentContract extends Contract {
     }
 
     async createDocument(ctx, documentId, applicantId, applicantName, applicantOrganizationNumber, organizationId, organizationName, documentName, description, dateOfAccomplishment, tenure, percentage, outOfPercentage, status, documentUrl, updatedBy){
-       
+
         let newDocument = await new Document(documentId, "documentHash", applicantId, applicantName, applicantOrganizationNumber, organizationId, organizationName, documentName, description, dateOfAccomplishment, tenure, percentage, outOfPercentage, status, documentUrl, updatedBy);
         const exists = await this.documentExists(ctx, newDocument.documentId);
-       
+
         if (exists) {
             throw new Error(`The Document ${newDocument.documentId} already exists`);
         }
         const buffer = Buffer.from(JSON.stringify(newDocument));
+
         await ctx.stub.putState(newDocument.documentId, buffer);
     }
 
     async createVerifiedDocument(ctx, documentId, applicantId, applicantName, applicantOrganizationNumber, organizationId, organizationName, documentName, description, dateOfAccomplishment, tenure, percentage, outOfPercentage, documentUrl, updatedBy){
         
-        this.createDocument(documentId, applicantId, applicantName, applicantOrganizationNumber, organizationId, organizationName, documentName, description, dateOfAccomplishment, tenure, percentage, outOfPercentage, "Verified", documentUrl, updatedBy)
+        await this.createDocument(ctx, documentId, applicantId, applicantName, applicantOrganizationNumber, organizationId, organizationName, documentName, description, dateOfAccomplishment, tenure, percentage, outOfPercentage, "Verified", documentUrl, updatedBy)
     }
 
-    async createSelfUploadedDocument(ctx, documentId, applicantId, applicantName, applicantOrganizationNumber, organizationId, organizationName, documentName, description, dateOfAccomplishment, tenure, percentage, outOfPercentage, documentUrl, updatedBy){
+    async createSelfUploadedDocument(ctx, documentId, applicantId, applicantName, applicantOrganizationNumber, organizationId, organizationName, documentName, description, dateOfAccomplishment, tenure, percentage, outOfPercentage, documentUrl){
         
-        this.createDocument(documentId, applicantId, applicantName, applicantOrganizationNumber, organizationId, organizationName, documentName, description, dateOfAccomplishment, tenure, percentage, outOfPercentage, "Self-Uploaded", documentUrl, updatedBy)
+        await this.createDocument(ctx, documentId, applicantId, applicantName, applicantOrganizationNumber, organizationId, organizationName, documentName, description, dateOfAccomplishment, tenure, percentage, outOfPercentage, "Self-Uploaded", documentUrl, applicantId)
     }
 
     async verifyDocument(ctx, documentId, updatedBy){
@@ -107,7 +108,7 @@ class DocumentContract extends Contract {
         return this.fetchLimitedFieldsForDocument(asset);
     }
 
-    async getDocumentsBySignedByOrganization(ctx, organizationId) {
+    async getDocumentsSignedByOrganization(ctx, organizationId) {
         let queryString = {};
         queryString.selector = {};
         queryString.selector.organizationId = organizationId;
