@@ -27,6 +27,7 @@ class ApplicantContract extends Contract {
 
     //read applicant details based on applicantId
     async getApplicant(ctx, applicantId) {
+
         const exists = await this.applicantExists(ctx, applicantId);
         if (!exists) {
             throw new Error(`The applicant ${applicantId} does not exist`);
@@ -56,6 +57,10 @@ class ApplicantContract extends Contract {
 
     async createApplicant(ctx, applicantId, email, password, name, address, pin, state, country, contact, dateOfBirth) {
 
+        if(await this.getUserRole(ctx) !== 'viceAdmin'){
+            return;
+        }
+
         if (password === null || password === '') {
             throw new Error(`Empty or null values should not be passed for password parameter`);
         }
@@ -75,9 +80,14 @@ class ApplicantContract extends Contract {
 
     /* ****************RONAK START******************/
     async updateApplicantPersonalDetails(ctx, args) {
+
+        if(await this.getUserRole(ctx) !== 'applicant'){
+            return;
+        }
+
     	args = JSON.parse(args);
 		let isDataChanged = false;
-		let applicantId = args.applicantId;
+		let applicantId = await this.getUserIdentity(ctx);
 		let newName = args.name;
 		let newEmail = args.email;
 		let newAddress = args.address;
@@ -124,15 +134,21 @@ class ApplicantContract extends Contract {
 
 		if (isDataChanged === false) return;
 
-        applicant.updatedBy = args.applicantId;
+        applicant.updatedBy = applicantId;
 
 		const buffer = Buffer.from(JSON.stringify(applicant));
 		await ctx.stub.putState(applicantId, buffer);
     }
 
-    async changeCurrentOrganization(ctx, applicantId, organizationId, updatedBy){
-        let isDataChanged = false;
+    async changeCurrentOrganization(ctx, applicantId){
 
+        if(await this.getUserRole(ctx) !== 'viceAdmin'){
+            return;
+        }
+
+        let isDataChanged = false;
+        let userIdentity = await this.getUserIdentity(ctx);
+        let organizationId = await this.getOrganization(ctx);
         const applicant = await this.getApplicant(ctx, applicantId);
 
         if (applicant.currentOrganization !== organizationId) {
@@ -147,13 +163,18 @@ class ApplicantContract extends Contract {
 
         if (isDataChanged === false) return;
 
-        applicant.updatedBy = updatedBy;
+        applicant.updatedBy = userIdentity;
         const buffer = Buffer.from(JSON.stringify(applicant));
         await ctx.stub.putState(applicantId, buffer);
     }
 
-    async grantAccessToOrganization(ctx, applicantId, organizationId) {
+    async grantAccessToOrganization(ctx, organizationId) {
 
+        if(await this.getUserRole(ctx) !== 'applicant'){
+            return;
+        }
+
+        let applicantId = await this.getUserIdentity(ctx);
         const applicant = await this.getApplicant(ctx, applicantId);
         // unique organizationIDs in permissionGranted
         if (!applicant.permissionGranted.includes(organizationId)) {
@@ -166,8 +187,12 @@ class ApplicantContract extends Contract {
         await ctx.stub.putState(applicantId, buffer);
     };
 
-    async revokeAccessFromOrganization(ctx, applicantId, organizationId) {
-        
+    async revokeAccessFromOrganization(ctx, organizationId) {
+        if(await this.getUserRole(ctx) !== 'applicant'){
+            return;
+        }
+
+        let applicantId = await this.getUserIdentity(ctx);
         const applicant = await this.getApplicant(ctx, applicantId);
         // Remove the organization if existing
         if (applicant.permissionGranted.includes(organizationId)) {
@@ -181,18 +206,25 @@ class ApplicantContract extends Contract {
     /********************RONAK END*******************/
     
 
-    async addDocumentIdToArray(ctx, applicantId, documentId, updatedBy){
+    async addDocumentIdToArray(ctx, applicantId, documentId){
+
         const applicant = await this.getApplicant(ctx, applicantId);
         if (!applicant.documentIds.includes(documentId)) {
             applicant.documentIds.push(documentId);
-            applicant.updatedBy = updatedBy;
+            applicant.updatedBy = await this.getUserIdentity(ctx);
             const buffer = Buffer.from(JSON.stringify(applicant));
             await ctx.stub.putState(applicantId, buffer);
         }
     }
 
 
-    async getPermissionedApplicant(ctx, applicantId, organizationId){
+    async getPermissionedApplicant(ctx, applicantId){
+        let role = await this.getUserRole(ctx);
+        if(role !== 'viceAdmin' || role !== 'admin'){
+            return;
+        }
+
+        let organizationId = await this.getOrganization(ctx);
         let applicant = await this.getApplicant(ctx, applicantId);
         
         if(applicant.permissionGranted.includes(organizationId)){
@@ -202,6 +234,11 @@ class ApplicantContract extends Contract {
     }
 
     async getCurrentApplicantsEnrolled(ctx){
+        let role = await this.getUserRole(ctx);
+        if(role !== 'viceAdmin' || role !== 'admin'){
+            return;
+        }
+
         let organizationId = await this.getOrganization(ctx);
         let queryString = {};
         queryString.selector = {};
@@ -231,7 +268,24 @@ class ApplicantContract extends Contract {
     }
 
     async getAllApplicantsofOrganization(ctx){
+        let role = await this.getUserRole(ctx);
+        if(role !== 'viceAdmin' || role !== 'admin'){
+            return;
+        }
+    }
 
+    async getPermissionedApplicantHistory(ctx, applicantId){
+        let role = await this.getUserRole(ctx);
+        if(role !== 'viceAdmin' || role !== 'admin'){
+            return;
+        }
+
+        let organizationId = await this.getOrganization(ctx);
+        let applicant = await this.getApplicant(ctx, applicantId);
+        
+        if(applicant.permissionGranted.includes(organizationId)){
+            return await this.getApplicantHistory(ctx, applicantId);
+        }
     }
 
     async getApplicantHistory(ctx, applicantId) {
@@ -290,6 +344,12 @@ class ApplicantContract extends Contract {
 
         //x509::/OU=org1/OU=client/OU=department1/CN=appUser::/C=US/ST=North Carolina/L=Durham/O=org1.example.com/CN=ca.org1.example.com
         return cid.getID().split('::')[1];
+    }
+
+    async getUserRole(ctx){
+        const ClientIdentity = require('fabric-shim').ClientIdentity;
+        let cid = new ClientIdentity(ctx.stub);
+        return cid.getAttributeValue('Role');
     }
 
     fetchLimitedFieldsForOrganization = (asset, includeTimeStamp = false) => {

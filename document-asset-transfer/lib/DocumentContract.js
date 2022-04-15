@@ -40,7 +40,7 @@ class DocumentContract extends Contract {
 
     async getPermissionedDocument(ctx, documentId){
         let document = await this.getDocument(ctx, documentId);
-        
+        //todo 
         return this.fetchLimitedFieldsForDocument(document);
     }
 
@@ -49,9 +49,12 @@ class DocumentContract extends Contract {
         return (!!buffer && buffer.length > 0);
     }
 
-    async createDocument(ctx, documentId, applicantId, applicantName, applicantOrganizationNumber, organizationId, organizationName, documentName, description, dateOfAccomplishment, tenure, percentage, outOfPercentage, status, documentUrl, updatedBy){
+    async createDocument(ctx, documentId, applicantId, applicantName, applicantOrganizationNumber, organizationId, organizationName, documentName, description, dateOfAccomplishment, tenure, percentage, outOfPercentage, status, documentUrl){
+        if(await this.getUserRole(ctx) === 'admin')
+            return;
 
-        let newDocument = await new Document(documentId, "documentHash", applicantId, applicantName, applicantOrganizationNumber, organizationId, organizationName, documentName, description, dateOfAccomplishment, tenure, percentage, outOfPercentage, status, documentUrl, updatedBy);
+        let userId = await this.getUserIdentity(ctx);
+        let newDocument = await new Document(documentId, "documentHash", applicantId, applicantName, applicantOrganizationNumber, organizationId, organizationName, documentName, description, dateOfAccomplishment, tenure, percentage, outOfPercentage, status, documentUrl, userId);
         const exists = await this.documentExists(ctx, newDocument.documentId);
 
         if (exists) {
@@ -62,17 +65,24 @@ class DocumentContract extends Contract {
         await ctx.stub.putState(newDocument.documentId, buffer);
     }
 
-    async createVerifiedDocument(ctx, documentId, applicantId, applicantName, applicantOrganizationNumber, organizationId, organizationName, documentName, description, dateOfAccomplishment, tenure, percentage, outOfPercentage, documentUrl, updatedBy){
-        
-        await this.createDocument(ctx, documentId, applicantId, applicantName, applicantOrganizationNumber, organizationId, organizationName, documentName, description, dateOfAccomplishment, tenure, percentage, outOfPercentage, "Verified", documentUrl, updatedBy)
+    async createVerifiedDocument(ctx, documentId, applicantId, applicantName, applicantOrganizationNumber, organizationId, organizationName, documentName, description, dateOfAccomplishment, tenure, percentage, outOfPercentage, documentUrl){
+        if(await this.getUserRole(ctx) !== 'viceAdmin'){
+            return;
+        }
+        await this.createDocument(ctx, documentId, applicantId, applicantName, applicantOrganizationNumber, organizationId, organizationName, documentName, description, dateOfAccomplishment, tenure, percentage, outOfPercentage, "Verified", documentUrl)
     }
 
     async createSelfUploadedDocument(ctx, documentId, applicantId, applicantName, applicantOrganizationNumber, organizationId, organizationName, documentName, description, dateOfAccomplishment, tenure, percentage, outOfPercentage, documentUrl){
-        
+        if(await this.getUserRole(ctx) !== 'applicant'){
+            return;
+        }
         await this.createDocument(ctx, documentId, applicantId, applicantName, applicantOrganizationNumber, organizationId, organizationName, documentName, description, dateOfAccomplishment, tenure, percentage, outOfPercentage, "Self-Uploaded", documentUrl, applicantId)
     }
 
     async verifyDocument(ctx, documentId){
+        if(await this.getUserRole(ctx) !== 'viceAdmin'){
+            return;
+        }
         let isDataChanged = false;
         let newStatus = "Verified";
         let userIdentity = await this.getUserIdentity(ctx);
@@ -109,7 +119,12 @@ class DocumentContract extends Contract {
         return this.fetchLimitedFieldsForDocument(asset);
     }
 
-    async getDocumentsSignedByOrganization(ctx, organizationId) {
+    async getDocumentsSignedByOrganization(ctx) {
+        let role = await this.getUserRole(ctx);
+        if(role !== 'viceAdmin' || role !== 'admin'){
+            return;
+        }
+        let organizationId = await this.getOrganization(ctx);
         let queryString = {};
         queryString.selector = {};
         queryString.selector.organizationId = organizationId;
@@ -181,6 +196,12 @@ class DocumentContract extends Contract {
 
         //x509::/OU=org1/OU=client/OU=department1/CN=appUser::/C=US/ST=North Carolina/L=Durham/O=org1.example.com/CN=ca.org1.example.com
         return cid.getID().split('::')[1];
+    }
+
+    async getUserRole(ctx){
+        const ClientIdentity = require('fabric-shim').ClientIdentity;
+        let cid = new ClientIdentity(ctx.stub);
+        return cid.getAttributeValue('Role');
     }
 
     fetchLimitedFieldsForDocument = (asset, includeTimeStamp = false) => {
