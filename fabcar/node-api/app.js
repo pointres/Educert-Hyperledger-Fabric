@@ -32,6 +32,29 @@ app.post("/register", async (req, res) => {
     }
 });
 
+app.post("/createApplicant", async (req, res) => {
+
+    try {
+        let applicantId = req.body.applicantinfoSignup.applicantinfoSignup.applicantId;
+        let email = req.body.applicantinfoSignup.email;
+        let password = req.body.applicantinfoSignup.password;
+        let name = req.body.applicantinfoSignup.fullName;
+        let address = req.body.applicantinfoSignup.address;
+        let pin = req.body.applicantinfoSignup.pincode;
+        let state = req.body.applicantinfoSignup.stateOfApplicant;
+        let country = req.body.applicantinfoSignup.country;
+        let contact = req.body.applicantinfoSignup.contactNumber;
+        let dateOfBirth = req.body.applicantinfoSignup.dob;
+
+
+        let result = await createApplicant({ applicantId, email, password, name, address, pin, state, country, contact, dateOfBirth });
+        res.send(result);
+
+    } catch (error) {
+        res.status(500).send(error)
+    }
+
+});
 
 /* app.post("/verifyDocument", async (req, res) => {
     try {
