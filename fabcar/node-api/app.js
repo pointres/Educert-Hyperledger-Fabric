@@ -8,6 +8,7 @@ const { verifyDocument } =require('./tx')
 const { getApplicant } =require('./query')
 
 const chaincodeName = "applicant-asset-transfer";
+const documentChaincode = "document-asset-transfer";
 const channelName = "mychannel"
 
 var cors = require('cors')
@@ -20,14 +21,14 @@ app.listen(4000, () => {
 })
 
 app.post("/register", async (req, res) => {
-
     try {
         let org = req.body.org;
         let userId = req.body.userId;
-        let result = await registerUser({ OrgMSP: org, userId: userId });
+        let role = req.body.role;
+        let result = await registerUser({ OrgMSP: org, userId: userId, role });
         res.send(result);
-
-    } catch (error) {
+    } 
+    catch (error) {
         res.status(500).send(error)
     }
 });
@@ -46,7 +47,6 @@ app.post("/createApplicant", async (req, res) => {
         let contact = req.body.applicantinfoSignup.contactNumber;
         let dateOfBirth = req.body.applicantinfoSignup.dob;
 
-
         let result = await createApplicant({ applicantId, email, password, name, address, pin, state, country, contact, dateOfBirth });
         res.send(result);
 
@@ -56,24 +56,23 @@ app.post("/createApplicant", async (req, res) => {
 
 });
 
-/* app.post("/verifyDocument", async (req, res) => {
+app.post("/verifyDocument", async (req, res) => {
     try {
-
 
         let payload = {
             "org": req.body.org,
             "channelName": channelName,
-            "chaincodeName": chaincodeName,
+            "chaincodeName": documentChaincode,
             "userId": req.body.userId,
             "data": req.body.data
         }
 
         let result = await verifyDocument(payload);
-        res.send(result)
+        res.send(result);
     } catch (error) {
         res.status(500).send(error)
     }
-}) */
+})
 
 
 

@@ -33,7 +33,7 @@ exports.verifyDocument = async (request) => {
     await gateway.connect(ccp, {
         wallet,
         identity: request.userId,
-        discovery: { enabled: true, asLocalhost: false } // using asLocalhost as this gateway is using a fabric network deployed locally
+        discovery: { enabled: true, asLocalhost: true } // using asLocalhost as this gateway is using a fabric network deployed locally
     });
 
     // Build a network instance based on the channel where the smart contract is deployed
@@ -42,7 +42,7 @@ exports.verifyDocument = async (request) => {
     // Get the contract from the network.
     const contract = network.getContract(request.chaincodeName);
     let data=request.data;
-    let result = await contract.submitTransaction('verifyDocument',data.applicantId, data.documentId, request.userId);
+    let result = await contract.submitTransaction('verifyDocument',data.documentId);
     return (result);
 }
 

@@ -54,7 +54,7 @@ exports.enrollAdmin = async (caClient, wallet, orgMspId) => {
 	}
 };
 
-exports.registerAndEnrollUser = async (caClient, wallet, orgMspId, userId, affiliation) => {
+exports.registerAndEnrollUser = async (caClient, wallet, orgMspId, userId, affiliation, role) => {
 	try {
 		// Check to see if we've already enrolled the user
 		const userIdentity = await wallet.get(userId);
@@ -81,12 +81,13 @@ exports.registerAndEnrollUser = async (caClient, wallet, orgMspId, userId, affil
 			affiliation: affiliation,
 			enrollmentID: userId,
 			role: 'client',
-			attrs: [{ name: 'role', value: 'approver', ecert: true }]
+			attrs: [{ name: 'role', value: role, ecert: true }]
 		}, adminUser);
 
 		const enrollment = await caClient.enroll({
 			enrollmentID: userId,
-			enrollmentSecret: secret
+			enrollmentSecret: secret,
+			attr_reqs: [{ name: 'role', optional: false }]
 		});
 
 		const x509Identity = {

@@ -9,7 +9,7 @@ const { Utils: utils } = require('fabric-common');
 let config=utils.getConfig()
 config.file(path.resolve(__dirname,'config.json'))
 let walletPath;
-exports.registerUser = async ({ OrgMSP, userId }) => {
+exports.registerUser = async ({ OrgMSP, userId, role }) => {
 
     let org = Number(OrgMSP.match(/\d/g).join(""));
     walletPath=path.join(__dirname,"wallet")
@@ -33,7 +33,7 @@ exports.registerUser = async ({ OrgMSP, userId }) => {
 
     // in a real application this would be done only when a new user was required to be added
     // and would be part of an administrative flow
-    await registerAndEnrollUser(caClient, wallet, OrgMSP, userId, `org${org}.department1`);
+    await registerAndEnrollUser(caClient, wallet, OrgMSP, userId, `org${org}.department1`, role);
 
     return {
         wallet
