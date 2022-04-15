@@ -74,21 +74,21 @@ exports.registerAndEnrollUser = async (caClient, wallet, orgMspId, userId, affil
 		// build a user object for authenticating with the CA
 		const provider = wallet.getProviderRegistry().getProvider(adminIdentity.type);
 		const adminUser = await provider.getUserContext(adminIdentity, adminUserId);
-		console.log("11111111111111111111")
 
 		// Register the user, enroll the user, and import the new identity into the wallet.
 		// if affiliation is specified by client, the affiliation value must be configured in CA
 		const secret = await caClient.register({
 			affiliation: affiliation,
 			enrollmentID: userId,
-			role: 'client'
+			role: 'client',
+			attrs: [{ name: 'role', value: 'approver', ecert: true }]
 		}, adminUser);
-		console.log("22222222222222222222")
+
 		const enrollment = await caClient.enroll({
 			enrollmentID: userId,
 			enrollmentSecret: secret
 		});
-		console.log("3333333333333333333")
+
 		const x509Identity = {
 			credentials: {
 				certificate: enrollment.certificate,
@@ -97,7 +97,7 @@ exports.registerAndEnrollUser = async (caClient, wallet, orgMspId, userId, affil
 			mspId: orgMspId,
 			type: 'X.509',
 		};
-		console.log("44444444444444444444444")
+		
 		await wallet.put(userId, x509Identity);
 		console.log(`Successfully registered and enrolled user ${userId} and imported it into the wallet`);
 	} catch (error) {

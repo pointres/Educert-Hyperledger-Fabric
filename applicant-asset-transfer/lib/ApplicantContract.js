@@ -46,6 +46,7 @@ class ApplicantContract extends Contract {
             contact : asset.contact,
             dateOfBirth : asset.dateOfBirth,
             documentIds : asset.documentIds,
+            organizationsEnrolledIn : asset.organizationsEnrolledIn,
             permissionGranted : asset.permissionGranted,
             updatedBy : asset.updatedBy,
         });
@@ -53,13 +54,16 @@ class ApplicantContract extends Contract {
     }
 
 
-    async createApplicant(ctx, applicantId, email, password, name, address, pin, state, country, contact, dateOfBirth, currentOrganization, updatedBy) {
+    async createApplicant(ctx, applicantId, email, password, name, address, pin, state, country, contact, dateOfBirth) {
 
         if (password === null || password === '') {
             throw new Error(`Empty or null values should not be passed for password parameter`);
         }
 
-        let newApplicant = await new Applicant(applicantId, email, password, name, address, pin, state, country, contact, dateOfBirth, currentOrganization, updatedBy);
+        let currentOrganization = await this.getOrganization(ctx);
+        let userIdentity = await this.getUserIdentity(ctx);
+
+        let newApplicant = await new Applicant(applicantId, email, password, name, address, pin, state, country, contact, dateOfBirth, currentOrganization, userIdentity);
         const exists = await this.applicantExists(ctx, newApplicant.applicantId);
         if (exists) {
             throw new Error(`The applicant ${newApplicant.applicantId} already exists`);
@@ -136,6 +140,11 @@ class ApplicantContract extends Contract {
             isDataChanged = true;
         }
 
+        if (!applicant.organizationsEnrolledIn.includes(organizationId)) {
+            applicant.organizationsEnrolledIn.push(organizationId);
+            isDataChanged = true;
+        }
+
         if (isDataChanged === false) return;
 
         applicant.updatedBy = updatedBy;
@@ -192,6 +201,17 @@ class ApplicantContract extends Contract {
         throw new Error("Your Organization does not have permission to view this Applicant!");
     }
 
+    async getCurrentApplicantsEnrolled(ctx){
+        let organizationId = await this.getOrganization(ctx);
+        let queryString = {};
+        queryString.selector = {};
+        queryString.selector.currentOrganization = organizationId;
+        const buffer = await this.getQueryResultForQueryString(ctx, JSON.stringify(queryString));
+        let asset = JSON.parse(buffer.toString());
+
+        return this.fetchLimitedFieldsForOrganization(asset);
+    }
+
     async applicantExists(ctx, applicantId) {
         const buffer = await ctx.stub.getState(applicantId);
         return (!!buffer && buffer.length > 0);
@@ -208,6 +228,10 @@ class ApplicantContract extends Contract {
         let resultsIterator = await ctx.stub.getStateByRange('', '');
         let asset = await this.getAllApplicantResults(resultsIterator, false);
         return this.fetchLimitedFieldsForOrganization(asset);
+    }
+
+    async getAllApplicantsofOrganization(ctx){
+
     }
 
     async getApplicantHistory(ctx, applicantId) {
@@ -248,6 +272,26 @@ class ApplicantContract extends Contract {
         }
     }
 
+    async getOrganization(ctx){
+        let identity = await this.getIdentity(ctx);
+        identity = identity.split('/')[1].split('=');
+        return identity[1].toString('utf8');
+    }
+
+    async getUserIdentity(ctx){
+        let identity = await this.getIdentity(ctx);
+        identity = identity.split('/')[4].split('=');
+        return identity[1].toString('utf8');
+    }
+
+    async getIdentity(ctx){
+        const ClientIdentity = require('fabric-shim').ClientIdentity;
+        let cid = new ClientIdentity(ctx.stub);
+
+        //x509::/OU=org1/OU=client/OU=department1/CN=appUser::/C=US/ST=North Carolina/L=Durham/O=org1.example.com/CN=ca.org1.example.com
+        return cid.getID().split('::')[1];
+    }
+
     fetchLimitedFieldsForOrganization = (asset, includeTimeStamp = false) => {
         for (let i = 0; i < asset.length; i++) {
             const obj = asset[i];
@@ -262,6 +306,8 @@ class ApplicantContract extends Contract {
                 contact: obj.Record.contact,
                 dateOfBirth: obj.Record.dateOfBirth,
                 documentIds : obj.Record.documentIds,
+                currentOrganization : obj.Record.currentOrganization,
+                organizationsEnrolledIn : obj.Record.organizationsEnrolledIn,
                 updatedBy : obj.Record.updatedBy
             };
             if (includeTimeStamp) {

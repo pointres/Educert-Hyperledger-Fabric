@@ -12,6 +12,7 @@
         "dateOfBirth":"12-11-2000",
         "documentIds":[],
         "currentOrganization":"org1",
+        "organizationsEnrolledIn":["org1"],
         "permissionGranted":["org1"],
         "updatedBy":"initLedger"
     },
@@ -28,6 +29,7 @@
         "dateOfBirth":"23-11-2000",
         "documentIds":[],
         "currentOrganization":"org2",
+        "organizationsEnrolledIn":["org2"],
         "permissionGranted":["org2"],
         "updatedBy":"initLedger"
     }   

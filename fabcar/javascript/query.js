@@ -77,6 +77,8 @@ async function main() {
         // const result11 = await contract.evaluateTransaction('getApplicantHistory',"1814073");
         // console.log(`Transaction has been evaluated, result is: ${result11.toString()}`);
 
+        const result22 = await contract.evaluateTransaction('getCurrentApplicantsEnrolled');
+        console.log(`Transaction has been evaluated, result is: ${result22.toString()}`);
 
 
 

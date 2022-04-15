@@ -17,6 +17,7 @@ class Applicant {
         this.dateOfBirth = dateOfBirth,
         this.documentIds = [],
         this.currentOrganization = currentOrganization,
+        this.organizationsEnrolledIn = [currentOrganization],
         this.permissionGranted= [currentOrganization],
         this.updatedBy = updatedBy
         return this;

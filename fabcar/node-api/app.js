@@ -20,7 +20,7 @@ app.listen(4000, () => {
 })
 
 app.post("/register", async (req, res) => {
-	console.log("Yash Bhadve")
+
     try {
         let org = req.body.org;
         let userId = req.body.userId;
@@ -114,8 +114,6 @@ app.post("/register", async (req, res) => {
 
 app.get('/getApplicant/:applicantId/search', async (req, res) => {
     try {
-        console.log("yash bhadve");
-
         let payload = {
             "org": req.query.org,
             "channelName": channelName,
@@ -151,5 +149,3 @@ app.get('/getApplicant/:applicantId/search', async (req, res) => {
 //     }
 
 // });
-
-

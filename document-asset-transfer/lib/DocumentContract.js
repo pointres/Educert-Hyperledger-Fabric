@@ -72,9 +72,10 @@ class DocumentContract extends Contract {
         await this.createDocument(ctx, documentId, applicantId, applicantName, applicantOrganizationNumber, organizationId, organizationName, documentName, description, dateOfAccomplishment, tenure, percentage, outOfPercentage, "Self-Uploaded", documentUrl, applicantId)
     }
 
-    async verifyDocument(ctx, documentId, updatedBy){
+    async verifyDocument(ctx, documentId){
         let isDataChanged = false;
         let newStatus = "Verified";
+        let userIdentity = await this.getUserIdentity(ctx);
 
         const document = await this.getDocument(ctx, documentId);
 
@@ -85,7 +86,7 @@ class DocumentContract extends Contract {
 
         if (isDataChanged === false) return;
 
-        document.updatedBy = updatedBy;
+        document.updatedBy = userIdentity;
 
         const buffer = Buffer.from(JSON.stringify(document));
         await ctx.stub.putState(documentId, buffer);
@@ -160,6 +161,26 @@ class DocumentContract extends Contract {
                 return allResults;
             }
         }
+    }
+
+    async getOrganization(ctx){
+        let identity = await this.getIdentity(ctx);
+        identity = identity.split('/')[1].split('=');
+        return identity[1].toString('utf8');
+    }
+
+    async getUserIdentity(ctx){
+        let identity = await this.getIdentity(ctx);
+        identity = identity.split('/')[4].split('=');
+        return identity[1].toString('utf8');
+    }
+
+    async getIdentity(ctx){
+        const ClientIdentity = require('fabric-shim').ClientIdentity;
+        let cid = new ClientIdentity(ctx.stub);
+
+        //x509::/OU=org1/OU=client/OU=department1/CN=appUser::/C=US/ST=North Carolina/L=Durham/O=org1.example.com/CN=ca.org1.example.com
+        return cid.getID().split('::')[1];
     }
 
     fetchLimitedFieldsForDocument = (asset, includeTimeStamp = false) => {
