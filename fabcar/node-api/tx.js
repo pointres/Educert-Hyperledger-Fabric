@@ -43,6 +43,7 @@ exports.verifyDocument = async (request) => {
     const contract = network.getContract(request.chaincodeName);
     let data=request.data;
     let result = await contract.submitTransaction('verifyDocument',data.documentId);
+    console.log(result);
     return (result);
 }
 

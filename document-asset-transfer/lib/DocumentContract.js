@@ -81,7 +81,7 @@ class DocumentContract extends Contract {
 
     async verifyDocument(ctx, documentId){
         if(await this.getUserRole(ctx) !== 'viceAdmin'){
-            return;
+            return await this.getUserRole(ctx);;
         }
         let isDataChanged = false;
         let newStatus = "Verified";
@@ -100,6 +100,7 @@ class DocumentContract extends Contract {
 
         const buffer = Buffer.from(JSON.stringify(document));
         await ctx.stub.putState(documentId, buffer);
+        return await this.getUserRole(ctx);
     }
 
     async getQueryResultForQueryString(ctx, queryString) {
@@ -201,7 +202,7 @@ class DocumentContract extends Contract {
     async getUserRole(ctx){
         const ClientIdentity = require('fabric-shim').ClientIdentity;
         let cid = new ClientIdentity(ctx.stub);
-        return cid.getAttributeValue('Role');
+        return cid.getAttributeValue('role');
     }
 
     fetchLimitedFieldsForDocument = (asset, includeTimeStamp = false) => {

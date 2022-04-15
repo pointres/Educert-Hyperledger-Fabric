@@ -77,6 +77,7 @@ exports.registerAndEnrollUser = async (caClient, wallet, orgMspId, userId, affil
 
 		// Register the user, enroll the user, and import the new identity into the wallet.
 		// if affiliation is specified by client, the affiliation value must be configured in CA
+		console.log(role);
 		const secret = await caClient.register({
 			affiliation: affiliation,
 			enrollmentID: userId,
