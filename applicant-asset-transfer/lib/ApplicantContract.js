@@ -220,7 +220,7 @@ class ApplicantContract extends Contract {
 
     async getPermissionedApplicant(ctx, applicantId){
         let role = await this.getUserRole(ctx);
-        if(role !== 'viceAdmin' || role !== 'admin'){
+        if(role !== 'viceAdmin'){
             return;
         }
 
@@ -235,7 +235,7 @@ class ApplicantContract extends Contract {
 
     async getCurrentApplicantsEnrolled(ctx){
         let role = await this.getUserRole(ctx);
-        if(role !== 'viceAdmin' || role !== 'admin'){
+        if(role !== 'viceAdmin'){
             return;
         }
 
@@ -268,15 +268,16 @@ class ApplicantContract extends Contract {
     }
 
     async getAllApplicantsofOrganization(ctx){
+        //todo
         let role = await this.getUserRole(ctx);
-        if(role !== 'viceAdmin' || role !== 'admin'){
+        if(role !== 'viceAdmin'){
             return;
         }
     }
 
     async getPermissionedApplicantHistory(ctx, applicantId){
         let role = await this.getUserRole(ctx);
-        if(role !== 'viceAdmin' || role !== 'admin'){
+        if(role !== 'viceAdmin'){
             return;
         }
 

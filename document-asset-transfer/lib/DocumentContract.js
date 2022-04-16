@@ -38,10 +38,10 @@ class DocumentContract extends Contract {
         return asset;
     }
 
-    async getPermissionedDocument(ctx, documentId){
-        let document = await this.getDocument(ctx, documentId);
-        //todo 
-        return this.fetchLimitedFieldsForDocument(document);
+    async getPermissionedDocument(ctx, documentId, organizationId){
+        if(await this.getOrganization(ctx) === organizationId)
+            return this.fetchLimitedFieldsForDocument( await this.getDocument(ctx, documentId));
+        throw new Error(`You dont have permission to view the document`);
     }
 
     async documentExists(ctx, documentId) {
@@ -50,9 +50,7 @@ class DocumentContract extends Contract {
     }
 
     async createDocument(ctx, documentId, applicantId, applicantName, applicantOrganizationNumber, organizationId, organizationName, documentName, description, dateOfAccomplishment, tenure, percentage, outOfPercentage, status, documentUrl){
-        if(await this.getUserRole(ctx) === 'admin')
-            return;
-
+        
         let userId = await this.getUserIdentity(ctx);
         let newDocument = await new Document(documentId, "documentHash", applicantId, applicantName, applicantOrganizationNumber, organizationId, organizationName, documentName, description, dateOfAccomplishment, tenure, percentage, outOfPercentage, status, documentUrl, userId);
         const exists = await this.documentExists(ctx, newDocument.documentId);
@@ -122,7 +120,7 @@ class DocumentContract extends Contract {
 
     async getDocumentsSignedByOrganization(ctx) {
         let role = await this.getUserRole(ctx);
-        if(role !== 'viceAdmin' || role !== 'admin'){
+        if(role !== 'viceAdmin'){
             return;
         }
         let organizationId = await this.getOrganization(ctx);
