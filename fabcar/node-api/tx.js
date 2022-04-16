@@ -44,7 +44,7 @@ exports.verifyDocument = async (request) => {
     let data=request.data;
     let result = await contract.submitTransaction('verifyDocument',data.documentId);
     console.log(result);
-    return (result);
+    return result;
 }
 
 

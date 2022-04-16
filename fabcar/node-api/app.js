@@ -11,7 +11,8 @@ const chaincodeName = "applicant-asset-transfer";
 const documentChaincode = "document-asset-transfer";
 const channelName = "mychannel"
 
-var cors = require('cors')
+var cors = require('cors');
+const { response } = require("express");
 app.use(cors())
 app.use(bodyparser.json());
 
@@ -145,7 +146,7 @@ app.get('/getApplicant/:applicantId/search', async (req, res) => {
         }
 
         let result = await getApplicant(payload);
-        res.json(result);
+        res.send(result);
         console.log(result)
     } catch (error) {
         res.send(error)

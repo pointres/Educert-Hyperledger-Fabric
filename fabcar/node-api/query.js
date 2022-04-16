@@ -18,27 +18,22 @@ exports.getApplicant = async (request) => {
     let org = request.org;
     let num = Number(org.match(/\d/g).join(""));
     const ccp = getCCP(num);
-	console.log("aaaaaaaaaaaa")
     const wallet = await buildWallet(Wallets, walletPath);
 	console.log("")
     const gateway = new Gateway();
-	console.log("bbbbbbbbbbbbbb")
 	console.log(wallet)
     await gateway.connect(ccp, {
         wallet,
         identity:'admin',
         discovery: { enabled: true, asLocalhost: true }
     });
-	console.log("cccccccccccccccccccc")
 	console.log(request)
     // Build a network instance based on the channel where the smart contract is deployed
     const network = await gateway.getNetwork(request.channelName);
-	console.log("dddddddddddddddddddd")
     // Get the contract from the network.
     const contract = network.getContract(request.chaincodeName);
 	console.log("")
     let result = await contract.evaluateTransaction("getApplicant",request.applicantId);
-    	console.log("eeeeeeeeeeeeeeeeeeeee")
     return JSON.parse(result);
 }
 
