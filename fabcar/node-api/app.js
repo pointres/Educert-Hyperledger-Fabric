@@ -3,7 +3,7 @@ const app = express();
 var morgan = require('morgan')
 app.use(morgan('combined'))
 const bodyparser = require("body-parser");
-const { registerUser, userExist } = require("./registerUser");
+const { registerAdmin, registerUser, userExist } = require("./registerUser");
 const { verifyDocument } =require('./tx')
 const { getApplicant } =require('./query')
 
@@ -13,6 +13,7 @@ const channelName = "mychannel"
 
 var cors = require('cors');
 const { response } = require("express");
+const e = require("express");
 app.use(cors())
 app.use(bodyparser.json());
 
@@ -21,18 +22,50 @@ app.listen(4000, () => {
 
 })
 
-app.post("/register", async (req, res) => {
+app.post("/registerAdmin", async (req, res) => {
     try {
         let org = req.body.org;
-        let userId = req.body.userId;
-        let role = req.body.role;
-        let result = await registerUser({ OrgMSP: org, userId: userId, role });
+        let result = await registerAdmin({ OrgMSP: org });
         res.send(result);
     } 
     catch (error) {
         res.status(500).send(error)
     }
 });
+
+
+app.post("/registerViceAdmin", async (req, res) => {
+    try {
+        let org = req.body.org;
+        let userId = req.body.userId;
+        //todo check if admin is loggedIn
+        if(req.body.role === "admin"){
+            let result = await registerUser({ OrgMSP: org, userId: userId, role: "viceAdmin" });
+            res.send(result);
+        }
+        else{
+            res.status(401).send("Unauthorized access")
+        }
+    } 
+    catch (error) {
+        res.status(500).send(error)
+    }
+});
+
+app.post("/registerApplicant", async (req, res) => {
+    try {
+        let org = req.body.org;
+        let userId = req.body.userId;
+        if(req.body.role === "viceAdmin"){
+            let result = await registerUser({ OrgMSP: org, userId: userId, role: "applicant" });
+            res.send(result);
+        }
+    } 
+    catch (error) {
+        res.status(500).send(error)
+    }
+});
+
 
 app.post("/createApplicant", async (req, res) => {
 
