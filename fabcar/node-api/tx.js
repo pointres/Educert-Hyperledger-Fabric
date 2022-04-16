@@ -48,6 +48,34 @@ exports.verifyDocument = async (request) => {
 }
 
 
+exports.createApplicant = async (request) => {
+    let org = request.org;
+    let num = Number(org.match(/\d/g).join(""));
+    const ccp = getCCP(num);
+
+    const wallet = await buildWallet(Wallets, walletPath);
+
+    const gateway = new Gateway();
+
+    await gateway.connect(ccp, {
+        wallet,
+        identity: request.userId,
+        discovery: { enabled: true, asLocalhost: true } // using asLocalhost as this gateway is using a fabric network deployed locally
+    });
+
+    // Build a network instance based on the channel where the smart contract is deployed
+    const network = await gateway.getNetwork(request.channelName);
+
+    // Get the contract from the network.
+    const contract = network.getContract(request.chaincodeName);
+    let data=request.data;
+    //todo add args
+    let result = await contract.submitTransaction('createApplicant',data.documentId);
+    console.log(result);
+    return result;
+}
+
+
 /*
 {
     org:Org1MSP,
