@@ -117,6 +117,7 @@ app.post("/registerApplicant", auth, async (req, res) => {
             //register applicant in blockchain
             
             //let result = await createApplicant({ applicantId, email, password, name, address, pin, state, country, contact, dateOfBirth });
+            result = await createApplicant(req);
             return res.send(result);
         }
         else (

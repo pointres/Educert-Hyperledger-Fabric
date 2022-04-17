@@ -49,7 +49,7 @@ exports.verifyDocument = async (request) => {
 
 
 exports.createApplicant = async (request) => {
-    let org = request.org;
+    let organization = request.user.organization;
     let num = Number(org.match(/\d/g).join(""));
     const ccp = getCCP(num);
 
@@ -59,7 +59,7 @@ exports.createApplicant = async (request) => {
 
     await gateway.connect(ccp, {
         wallet,
-        identity: request.userId,
+        identity: request.user.userId,
         discovery: { enabled: true, asLocalhost: true } // using asLocalhost as this gateway is using a fabric network deployed locally
     });
 
@@ -68,9 +68,9 @@ exports.createApplicant = async (request) => {
 
     // Get the contract from the network.
     const contract = network.getContract(request.chaincodeName);
-    let data=request.data;
+    let data=request.body;
     //todo add args
-    let result = await contract.submitTransaction('createApplicant',data.documentId);
+    let result = await contract.submitTransaction('createApplicant',data.applicantId, data.email, data.password, data.name, data.address, data.pin, data.state, data.country, data.contact, data.dateOfBirth);
     console.log(result);
     return result;
 }
