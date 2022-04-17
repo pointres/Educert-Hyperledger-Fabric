@@ -82,7 +82,7 @@ app.post("/registerApplicant", auth, async (req, res) => {
     try {
         if(req.user.role === "viceAdmin"){
 
-            let applicantId = req.body.applicantinfoSignup.applicantId;
+            /*let applicantId = req.body.applicantinfoSignup.applicantId;
             let email = req.body.applicantinfoSignup.email;
             let name = req.body.applicantinfoSignup.fullName;
             let address = req.body.applicantinfoSignup.address;
@@ -90,13 +90,15 @@ app.post("/registerApplicant", auth, async (req, res) => {
             let state = req.body.applicantinfoSignup.stateOfApplicant;
             let country = req.body.applicantinfoSignup.country;
             let contact = req.body.applicantinfoSignup.contactNumber;
-            let dateOfBirth = req.body.applicantinfoSignup.dob;
-            let password = "Secure@2022";
-            let role = "applicant";
-            //generate certif
+            let dateOfBirth = req.body.applicantinfoSignup.dob;*/
+            let applicantId = req.body.userId;
+            let password = req.body.password = "Secure@2022";
             let organization = req.body.organization;
-            await registerUser({ OrgMSP: organization, userId: applicantId, role});
+            let role = req.body.role = "applicant";
+            //generate certif
             
+            let result = await registerUser({ OrgMSP: organization, userId: applicantId, role});
+            console.log(result);
             //register applicant in mongo
             const {error} = validateUser(req.body);
             if(error) return res.status(400).send(error.details[0].message);
@@ -114,7 +116,7 @@ app.post("/registerApplicant", auth, async (req, res) => {
 
             //register applicant in blockchain
             
-            let result = await createApplicant({ applicantId, email, password, name, address, pin, state, country, contact, dateOfBirth });
+            //let result = await createApplicant({ applicantId, email, password, name, address, pin, state, country, contact, dateOfBirth });
             return res.send(result);
         }
     } 
