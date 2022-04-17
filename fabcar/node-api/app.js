@@ -6,7 +6,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const bodyparser = require("body-parser");
 const { registerAdmin, registerUser, userExist } = require("./registerUser");
-const { createApplicant ,verifyDocument } =require('./tx')
+const { createApplicant ,verifyDocument, changeCurrentOrganization, grantAccessToOrganization, revokeAccessFromOrganization, getPermissionedApplicant, getPermissionedApplicantHistory, getCurrentApplicantsEnrolled } =require('./tx')
 const { getApplicant } =require('./query')
 const {User, validateUser} = require('./models/user')
 const config_1 = require("config")
@@ -161,7 +161,7 @@ app.post("/login", async (req, res) => {
 
 app.post("/changeCurrentOrganization",auth, async (req, res) => {
     try {
-        if(request.user.role === 'viceAdmin'){
+        if(req.user.role === 'viceAdmin'){
             let payload = {
                 "organization": req.user.organization,
                 "channelName": channelName,
@@ -182,7 +182,7 @@ app.post("/changeCurrentOrganization",auth, async (req, res) => {
 
 app.post("/grantAccessToOrganization",auth, async (req, res) => {
     try {
-        if(request.user.role === 'applicant'){
+        if(req.user.role === 'applicant'){
             let payload = {
                 "organization": req.user.organization,
                 "channelName": channelName,
@@ -203,7 +203,7 @@ app.post("/grantAccessToOrganization",auth, async (req, res) => {
 
 app.post("/revokeAccessFromOrganization",auth, async (req, res) => {
     try {
-        if(request.user.role === 'applicant'){
+        if(req.user.role === 'applicant'){
             let payload = {
                 "organization": req.user.organization,
                 "channelName": channelName,
@@ -224,7 +224,7 @@ app.post("/revokeAccessFromOrganization",auth, async (req, res) => {
 
 app.post("/getPermissionedApplicant",auth, async (req, res) => {
     try {
-        if(request.user.role === 'viceAdmin'){
+        if(req.user.role === 'viceAdmin'){
             let payload = {
                 "organization": req.user.organization,
                 "channelName": channelName,
@@ -245,7 +245,7 @@ app.post("/getPermissionedApplicant",auth, async (req, res) => {
 
 app.post("/getPermissionedApplicantHistory",auth, async (req, res) => {
     try {
-        if(request.user.role === 'viceAdmin'){
+        if(req.user.role === 'viceAdmin'){
             let payload = {
                 "organization": req.user.organization,
                 "channelName": channelName,
@@ -267,7 +267,7 @@ app.post("/getPermissionedApplicantHistory",auth, async (req, res) => {
 
 app.post("/getCurrentApplicantsEnrolled",auth, async (req, res) => {
     try {
-        if(request.user.role === 'viceAdmin'){
+        if(req.user.role === 'viceAdmin'){
             let payload = {
                 "organization": req.user.organization,
                 "channelName": channelName,

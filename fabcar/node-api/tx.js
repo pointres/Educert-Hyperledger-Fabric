@@ -110,7 +110,7 @@ exports.changeCurrentOrganization = async (request) => {
     // Get the contract from the network.
     const contract = network.getContract(request.chaincodeName);
     
-    let result = await contract.submitTransaction('changeCurrentOrganization',data.applicantId);
+    let result = await contract.submitTransaction('changeCurrentOrganization', request.data.applicantId);
     console.log(result);
     return result;
 }
@@ -138,7 +138,7 @@ exports.grantAccessToOrganization = async (request) => {
     // Get the contract from the network.
     const contract = network.getContract(request.chaincodeName);
     
-    let result = await contract.submitTransaction('grantAccessToOrganization',data.organizationId);
+    let result = await contract.submitTransaction('grantAccessToOrganization',request.data.organizationId);
     console.log(result);
     return result;
 }
@@ -165,7 +165,7 @@ exports.revokeAccessFromOrganization = async (request) => {
     // Get the contract from the network.
     const contract = network.getContract(request.chaincodeName);
     
-    let result = await contract.submitTransaction('revokeAccessFromOrganization',data.organizationId);
+    let result = await contract.submitTransaction('revokeAccessFromOrganization',request.data.organizationId);
     console.log(result);
     return result;
 }
@@ -191,7 +191,7 @@ exports.getPermissionedApplicant = async (request) => {
     // Get the contract from the network.
     const contract = network.getContract(request.chaincodeName);
     
-    let result = await contract.submitTransaction('getPermissionedApplicant',data.applicantId);
+    let result = await contract.submitTransaction('getPermissionedApplicant',request.data.applicantId);
     console.log(result);
     return result;
 }
@@ -217,7 +217,7 @@ exports.getPermissionedApplicantHistory = async (request) => {
     // Get the contract from the network.
     const contract = network.getContract(request.chaincodeName);
     
-    let result = await contract.submitTransaction('getPermissionedApplicantHistory',data.applicantId);
+    let result = await contract.submitTransaction('getPermissionedApplicantHistory',request.data.applicantId);
     console.log(result);
     return result;
 }
