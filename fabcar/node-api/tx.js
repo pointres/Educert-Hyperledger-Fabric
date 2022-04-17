@@ -50,7 +50,7 @@ exports.verifyDocument = async (request) => {
 
 exports.createApplicant = async (request) => {
     let organization = request.user.organization;
-    let num = Number(org.match(/\d/g).join(""));
+    let num = Number(organization.match(/\d/g).join(""));
     const ccp = getCCP(num);
 
     const wallet = await buildWallet(Wallets, walletPath);
@@ -69,8 +69,9 @@ exports.createApplicant = async (request) => {
     // Get the contract from the network.
     const contract = network.getContract(request.chaincodeName);
     let data=request.body;
+    console.log(num);
     //todo add args
-    let result = await contract.submitTransaction('createApplicant',data.applicantId, data.email, data.password, data.name, data.address, data.pin, data.state, data.country, data.contact, data.dateOfBirth);
+    let result = await contract.submitTransaction('createApplicant',data.userId, data.email, data.password, data.name, data.address, data.pin, data.state, data.country, data.contact, data.dateOfBirth);
     console.log(result);
     return result;
 }

@@ -350,7 +350,7 @@ class ApplicantContract extends Contract {
     async getUserRole(ctx){
         const ClientIdentity = require('fabric-shim').ClientIdentity;
         let cid = new ClientIdentity(ctx.stub);
-        return cid.getAttributeValue('Role');
+        return cid.getAttributeValue('role');
     }
 
     fetchLimitedFieldsForOrganization = (asset, includeTimeStamp = false) => {

@@ -6,7 +6,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const bodyparser = require("body-parser");
 const { registerAdmin, registerUser, userExist } = require("./registerUser");
-const { verifyDocument } =require('./tx')
+const { createApplicant ,verifyDocument } =require('./tx')
 const { getApplicant } =require('./query')
 const {User, validateUser} = require('./models/user')
 const config_1 = require("config")
@@ -100,7 +100,7 @@ app.post("/registerApplicant", auth, async (req, res) => {
             let result = await registerUser({ OrgMSP: organization, userId: applicantId, role});
             console.log(result);
             //register applicant in mongo
-            const {error} = validateUser(req.body);
+            const {error} = validateUser({userId:applicantId, password, organization, role});
             if(error) return res.status(400).send(error.details[0].message);
 
             let user = await User.findOne({ userId : applicantId,organization: organization, role: role });
@@ -117,6 +117,8 @@ app.post("/registerApplicant", auth, async (req, res) => {
             //register applicant in blockchain
             
             //let result = await createApplicant({ applicantId, email, password, name, address, pin, state, country, contact, dateOfBirth });
+            req.channelName =  channelName;
+            req.chaincodeName = chaincodeName;
             result = await createApplicant(req);
             return res.send(result);
         }
