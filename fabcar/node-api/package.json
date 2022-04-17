@@ -7,15 +7,19 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
+    "bcrypt": "^5.0.1",
+    "body-parser": "1.19.0",
+    "config": "^3.3.7",
+    "cors": "^2.8.5",
     "express": "4.17.1",
     "fabric-ca-client": "2.2.4",
     "fabric-network": "2.2.3",
-    "body-parser": "1.19.0",
-    "cors": "^2.8.5",
+    "joi": "^17.6.0",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^6.3.0",
     "morgan": "1.10.0"
   },
   "author": "",
   "license": "ISC",
-  "devDependencies": {},
   "description": ""
 }

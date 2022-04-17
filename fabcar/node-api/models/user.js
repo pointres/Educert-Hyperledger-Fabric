@@ -1,6 +1,10 @@
 const Joi = require('joi');
 const mongoose = require('mongoose');
 
+mongoose.connect("mongodb://localhost:27017/EduCert",{useUnifiedTopology:true,useNewUrlParser:true},()=>{
+    console.log("Connected to mongo server");
+})
+
 const User = mongoose.model('User', new mongoose.Schema({
     userId: {
         type: String,
@@ -30,13 +34,13 @@ const User = mongoose.model('User', new mongoose.Schema({
 }));
 
 function validateUser(user) {
-    const schema = {
+    const schema = Joi.object({
         userId: Joi.string().min(5).max(255).required(),
         password: Joi.string().min(5).max(1024).required(),
         organization: Joi.string().min(5).max(1024).required(),
         role: Joi.string().min(2).max(10).required()
-    };
-    return Joi.validate(user, schema);
+    });
+    return schema.validate(user);
 }
 
 exports.User = User;

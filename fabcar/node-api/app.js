@@ -8,7 +8,8 @@ const bodyparser = require("body-parser");
 const { registerAdmin, registerUser, userExist } = require("./registerUser");
 const { verifyDocument } =require('./tx')
 const { getApplicant } =require('./query')
-const {User, validateUser} = require('./models/viceAdmin')
+const {User, validateUser} = require('./models/user')
+const config_1 = require("config")
 
 const chaincodeName = "applicant-asset-transfer";
 const documentChaincode = "document-asset-transfer";
@@ -19,6 +20,7 @@ var cors = require('cors');
 const { response, request } = require("express");
 const e = require("express");
 const auth = require("./middleware/auth");
+
 app.use(cors())
 app.use(bodyparser.json());
 
@@ -47,16 +49,16 @@ app.post("/registerAdmin", async (req, res) => {
 app.post("/registerViceAdmin", auth, async (req, res) => {
     try {
         if(req.user.role === 'admin'){
-            let {userId, password, organization, role} = req.body;
-            
+            let {userId, password, organization} = req.body;
+
             const {error} = validateUser(req.body);
             if(error) return res.status(400).send(error.details[0].message);
 
-            let user = await User.findOne({ userId : userId, organization: organization, role:role });
+            let user = await User.findOne({ userId : userId, organization: organization, role:"viceAdmin"});
             if(user) return res.status(400).send("User already registered");
 
             user = new User({
-                userId, password, organization, role
+                userId, password, organization, role:"viceAdmin"
             });
             const salt = await bcrypt.genSalt(10);
             user.password = await bcrypt.hash(user.password,salt);
@@ -110,7 +112,7 @@ app.post("/registerApplicant", auth, async (req, res) => {
             await user.save();
 
 
-            //egister applicant in blockchain
+            //register applicant in blockchain
             
             let result = await createApplicant({ applicantId, email, password, name, address, pin, state, country, contact, dateOfBirth });
             return res.send(result);
@@ -139,7 +141,7 @@ app.post("/login", async (req, res) => {
         const validPassword = await bcrypt.compare(password, user.password );
         if(!validPassword) return res.status(400).send("Incorrect Username or Password");
 
-        const token = jwt.sign({ userId: user.userId, organization : user.organization, role: user.role}, config.get('jwtPrivateKey'));
+        const token = jwt.sign({ userId: user.userId, organization : user.organization, role: user.role}, config_1.get('jwtPrivateKey'));
         
         res.send(token);
 
@@ -149,26 +151,26 @@ app.post("/login", async (req, res) => {
     }
 });
 
-app.post("/verifyDocument",auth, async (req, res) => {
-    try {
-        if(request.user.role === 'viceAdmin'){
-            let payload = {
-                "org": req.user.organization,
-                "channelName": channelName,
-                "chaincodeName": documentChaincode,
-                "userId": req.user.userId,
-                "data": req.body.data
-            }
-            let result = await verifyDocument(payload);
-            res.send(result);
-        }
-        else{
-            res.status(402).send("Unauthorized operation");
-        }
-    } catch (error) {
-        res.status(500).send(error);
-    }
-})
+// app.post("/verifyDocument",auth, async (req, res) => {
+//     try {
+//         if(request.user.role === 'viceAdmin'){
+//             let payload = {
+//                 "org": req.user.organization,
+//                 "channelName": channelName,
+//                 "chaincodeName": documentChaincode,
+//                 "userId": req.user.userId,
+//                 "data": req.body.data
+//             }
+//             let result = await verifyDocument(payload);
+//             res.send(result);
+//         }
+//         else{
+//             res.status(402).send("Unauthorized operation");
+//         }
+//     } catch (error) {
+//         res.status(500).send(error);
+//     }
+// })
 
 
 
