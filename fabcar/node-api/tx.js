@@ -49,6 +49,7 @@ exports.verifyDocument = async (request) => {
 
 
 exports.createApplicant = async (request) => {
+    console.log(request.user);
     let organization = request.user.organization;
     let num = Number(organization.match(/\d/g).join(""));
     const ccp = getCCP(num);
@@ -69,7 +70,19 @@ exports.createApplicant = async (request) => {
     // Get the contract from the network.
     const contract = network.getContract(request.chaincodeName);
     let data=request.body;
-    console.log(num);
+    console.log(data.userId);
+    console.log(data.email);
+    console.log(data.password);
+    console.log(data.name);
+    console.log(data.address);
+    console.log(data.pin);
+    console.log(data.state);
+    console.log(data.country);
+    console.log(data.contact);
+    console.log(data.dateOfBirth);
+
+
+
     //todo add args
     let result = await contract.submitTransaction('createApplicant',data.userId, data.email, data.password, data.name, data.address, data.pin, data.state, data.country, data.contact, data.dateOfBirth);
     console.log(result);
