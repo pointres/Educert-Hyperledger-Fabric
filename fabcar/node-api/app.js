@@ -80,8 +80,8 @@ app.post("/registerViceAdmin", auth, async (req, res) => {
 
 app.post("/registerApplicant", auth, async (req, res) => {
     try {
+        console.log("azqwsxedcrfvtbgy nhujik,p,lokmijnuhbygvtfcrdexswzaqryefbvbjkdlzerihoy");
         if(req.user.role === "viceAdmin"){
-
             /*let applicantId = req.body.applicantinfoSignup.applicantId;
             let email = req.body.applicantinfoSignup.email;
             let name = req.body.applicantinfoSignup.fullName;
@@ -119,6 +119,9 @@ app.post("/registerApplicant", auth, async (req, res) => {
             //let result = await createApplicant({ applicantId, email, password, name, address, pin, state, country, contact, dateOfBirth });
             return res.send(result);
         }
+        else (
+        res.status(500).send("Unauthorized Access!")
+        )
     } 
     catch (error) {
         res.status(500).send(error)
