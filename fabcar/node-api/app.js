@@ -159,6 +159,153 @@ app.post("/login", async (req, res) => {
     }
 });
 
+app.post("/changeCurrentOrganization",auth, async (req, res) => {
+    try {
+        if(request.user.role === 'viceAdmin'){
+            let payload = {
+                "organization": req.user.organization,
+                "channelName": channelName,
+                "chaincodeName": chaincodeName,
+                "userId": req.user.userId,
+                "data": req.body.data,
+            }
+            let result = await changeCurrentOrganization(payload);
+            res.send(result);
+        }
+        else{
+            res.status(402).send("Unauthorized operation");
+        }
+    } catch (error) {
+        res.status(500).send(error);
+    }
+});
+
+app.post("/grantAccessToOrganization",auth, async (req, res) => {
+    try {
+        if(request.user.role === 'applicant'){
+            let payload = {
+                "organization": req.user.organization,
+                "channelName": channelName,
+                "chaincodeName": chaincodeName,
+                "userId": req.user.userId,
+                "data": req.body.data,
+            }
+            let result = await grantAccessToOrganization(payload);
+            res.send(result);
+        }
+        else{
+            res.status(402).send("Unauthorized operation");
+        }
+    } catch (error) {
+        res.status(500).send(error);
+    }
+});
+
+app.post("/revokeAccessFromOrganization",auth, async (req, res) => {
+    try {
+        if(request.user.role === 'applicant'){
+            let payload = {
+                "organization": req.user.organization,
+                "channelName": channelName,
+                "chaincodeName": chaincodeName,
+                "userId": req.user.userId,
+                "data": req.body.data,
+            }
+            let result = await revokeAccessFromOrganization(payload);
+            res.send(result);
+        }
+        else{
+            res.status(402).send("Unauthorized operation");
+        }
+    } catch (error) {
+        res.status(500).send(error);
+    }
+});
+
+app.post("/getPermissionedApplicant",auth, async (req, res) => {
+    try {
+        if(request.user.role === 'viceAdmin'){
+            let payload = {
+                "organization": req.user.organization,
+                "channelName": channelName,
+                "chaincodeName": chaincodeName,
+                "userId": req.user.userId,
+                "data": req.body.data,
+            }
+            let result = await getPermissionedApplicant(payload);
+            res.send(result);
+        }
+        else{
+            res.status(402).send("Unauthorized operation");
+        }
+    } catch (error) {
+        res.status(500).send(error);
+    }
+});
+
+app.post("/getPermissionedApplicantHistory",auth, async (req, res) => {
+    try {
+        if(request.user.role === 'viceAdmin'){
+            let payload = {
+                "organization": req.user.organization,
+                "channelName": channelName,
+                "chaincodeName": chaincodeName,
+                "userId": req.user.userId,
+                "data": req.body.data,
+            }
+            let result = await getPermissionedApplicantHistory(payload);
+            res.send(result);
+        }
+        else{
+            res.status(402).send("Unauthorized operation");
+        }
+    } catch (error) {
+        res.status(500).send(error);
+    }
+});
+
+
+app.post("/getCurrentApplicantsEnrolled",auth, async (req, res) => {
+    try {
+        if(request.user.role === 'viceAdmin'){
+            let payload = {
+                "organization": req.user.organization,
+                "channelName": channelName,
+                "chaincodeName": chaincodeName,
+                "userId": req.user.userId,
+            }
+            let result = await getCurrentApplicantsEnrolled(payload);
+            res.send(result);
+        }
+        else{
+            res.status(402).send("Unauthorized operation");
+        }
+    } catch (error) {
+        res.status(500).send(error);
+    }
+});
+
+// app.post("/getAllApplicantsOfOrganization",auth, async (req, res) => {
+//     try {
+//         if(request.user.role === 'viceAdmin'){
+//             let payload = {
+//                 "organization": req.user.organization,
+//                 "channelName": channelName,
+//                 "chaincodeName": chaincodeName,
+//                 "userId": req.user.userId,
+//             }
+//             let result = await getAllApplicantsOfOrganization(payload);
+//             res.send(result);
+//         }
+//         else{
+//             res.status(402).send("Unauthorized operation");
+//         }
+//     } catch (error) {
+//         res.status(500).send(error);
+//     }
+// });
+
+
 // app.post("/verifyDocument",auth, async (req, res) => {
 //     try {
 //         if(request.user.role === 'viceAdmin'){

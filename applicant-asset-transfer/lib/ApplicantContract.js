@@ -267,7 +267,7 @@ class ApplicantContract extends Contract {
         return this.fetchLimitedFieldsForOrganization(asset);
     }
 
-    async getAllApplicantsofOrganization(ctx){
+    async getAllApplicantsOfOrganization(ctx){
         //todo
         let role = await this.getUserRole(ctx);
         if(role !== 'viceAdmin'){
