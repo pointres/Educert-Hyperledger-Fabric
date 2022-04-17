@@ -1,6 +1,6 @@
 class Document {
 
-    constructor(documentId , documentHash , applicantId, applicantName , applicantOrganizationNumber , organizationId , organizationName , documentName , description , dateOfAccomplishment, tenure, percentage, outOfPercentage, status, documentURL, updatedBy)
+    constructor(documentId , documentHash , applicantId, applicantName , applicantOrganizationNumber , organizationId , documentName , description , dateOfAccomplishment, tenure, percentage, outOfPercentage, status, documentURL, updatedBy)
     {
         this.documentId = documentId
         this.documentHash = documentHash,
@@ -8,7 +8,6 @@ class Document {
         this.applicantName = applicantName,
         this.applicantOrganizationNumber = applicantOrganizationNumber,
         this.organizationId = organizationId,
-        this.organizationName = organizationName,
         this.documentName = documentName,
         this.description = description,
         this.dateOfAccomplishment = dateOfAccomplishment,
@@ -17,6 +16,7 @@ class Document {
         this.outOfPercentage = outOfPercentage,
         this.status = status,
         this.documentURL = documentURL,
+        this.permissionGranted = [organizationId],
         this.updatedBy = updatedBy
         return this;
     }

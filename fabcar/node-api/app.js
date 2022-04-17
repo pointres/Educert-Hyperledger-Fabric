@@ -11,7 +11,7 @@ const { getApplicant } =require('./query')
 const {User, validateUser} = require('./models/user')
 const config_1 = require("config")
 
-const chaincodeName = "applicant-asset-transfer";
+const applicantChaincode = "applicant-asset-transfer";
 const documentChaincode = "document-asset-transfer";
 const channelName = "mychannel"
 
@@ -118,7 +118,7 @@ app.post("/registerApplicant", auth, async (req, res) => {
             
             //let result = await createApplicant({ applicantId, email, password, name, address, pin, state, country, contact, dateOfBirth });
             req.channelName =  channelName;
-            req.chaincodeName = chaincodeName;
+            req.chaincodeName = applicantChaincode;
             result = await createApplicant(req);
             return res.send(result);
         }
@@ -165,7 +165,7 @@ app.post("/changeCurrentOrganization",auth, async (req, res) => {
             let payload = {
                 "organization": req.user.organization,
                 "channelName": channelName,
-                "chaincodeName": chaincodeName,
+                "chaincodeName": applicantChaincode,
                 "userId": req.user.userId,
                 "data": req.body.data,
             }
@@ -186,7 +186,7 @@ app.post("/grantAccessToOrganization",auth, async (req, res) => {
             let payload = {
                 "organization": req.user.organization,
                 "channelName": channelName,
-                "chaincodeName": chaincodeName,
+                "chaincodeName": applicantChaincode,
                 "userId": req.user.userId,
                 "data": req.body.data,
             }
@@ -207,7 +207,7 @@ app.post("/revokeAccessFromOrganization",auth, async (req, res) => {
             let payload = {
                 "organization": req.user.organization,
                 "channelName": channelName,
-                "chaincodeName": chaincodeName,
+                "chaincodeName": applicantChaincode,
                 "userId": req.user.userId,
                 "data": req.body.data,
             }
@@ -228,7 +228,7 @@ app.post("/getPermissionedApplicant",auth, async (req, res) => {
             let payload = {
                 "organization": req.user.organization,
                 "channelName": channelName,
-                "chaincodeName": chaincodeName,
+                "chaincodeName": applicantChaincode,
                 "userId": req.user.userId,
                 "data": req.body.data,
             }
@@ -249,7 +249,7 @@ app.post("/getPermissionedApplicantHistory",auth, async (req, res) => {
             let payload = {
                 "organization": req.user.organization,
                 "channelName": channelName,
-                "chaincodeName": chaincodeName,
+                "chaincodeName": applicantChaincode,
                 "userId": req.user.userId,
                 "data": req.body.data,
             }
@@ -271,7 +271,7 @@ app.post("/getCurrentApplicantsEnrolled",auth, async (req, res) => {
             let payload = {
                 "organization": req.user.organization,
                 "channelName": channelName,
-                "chaincodeName": chaincodeName,
+                "chaincodeName": applicantChaincode,
                 "userId": req.user.userId,
             }
             let result = await getCurrentApplicantsEnrolled(payload);
@@ -291,7 +291,7 @@ app.post("/getCurrentApplicantsEnrolled",auth, async (req, res) => {
 //             let payload = {
 //                 "organization": req.user.organization,
 //                 "channelName": channelName,
-//                 "chaincodeName": chaincodeName,
+//                 "chaincodeName": applicantChaincode,
 //                 "userId": req.user.userId,
 //             }
 //             let result = await getAllApplicantsOfOrganization(payload);
@@ -392,7 +392,7 @@ app.get('/getApplicant/:applicantId/search', async (req, res) => {
         let payload = {
             "org": req.query.org,
             "channelName": channelName,
-            "chaincodeName": chaincodeName,
+            "chaincodeName": applicantChaincode,
             "userId": req.query.userId,
             "applicantId":req.params.applicantId
         }

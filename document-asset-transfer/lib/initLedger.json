@@ -5,8 +5,7 @@
         "applicantId":"1814073", 
         "applicantName":"appname1", 
         "applicantOrganizationNumber":"0001", 
-        "organizationId":"54321",
-        "organizationName":"orgname1", 
+        "organizationId":"org2",
         "documentName":"docname8", 
         "description": "10th std certif",
         "dateOfAccomplishment":"12-25-2022",
@@ -15,6 +14,7 @@
         "outOfPercentage":"100",
         "status":"Self-Uploaded" ,
         "documentUrl" : "D:\\Practice\\Mega Proj\\Educert\\React\\MegaProject\\template\\cert.PNG",
+        "permissionGranted":["org2"],
         "updatedBy":"Teacher_1"
     },
     {
@@ -23,8 +23,7 @@
         "applicantId":"1814074", 
         "applicantName":"appname2", 
         "applicantOrganizationNumber":"0002", 
-        "organizationId":"12345",
-        "organizationName":"orgname2", 
+        "organizationId":"org1",
         "documentName":"docname10", 
         "description": "Degree Certificate",
         "dateOfAccomplishment":"31-07-2022",
@@ -33,6 +32,7 @@
         "outOfPercentage":"10",
         "status":"Self-Uploaded",
         "documentUrl" : "D:\\Practice\\Mega Proj\\Educert\\React\\MegaProject\\template\\cert.PNG",
+        "permissionGranted":["org1"],
         "updatedBy":"Teacher_2"
     }
 ]
