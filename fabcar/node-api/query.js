@@ -143,7 +143,7 @@ exports.getDocumentsByApplicantId = async (request) => {
     if(hasPermission){
     // Get the contract from the network.
         contract = network.getContract('document-asset-transfer');
-    
+        console.log(request.data.applicantId)
         let result = await contract.evaluateTransaction('getDocumentsByApplicantId', request.data.applicantId);
         
         return result;
