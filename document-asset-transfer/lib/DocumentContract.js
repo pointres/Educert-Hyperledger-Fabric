@@ -83,7 +83,7 @@ class DocumentContract extends Contract {
     async createSelfUploadedDocument(ctx, documentId, applicantId, applicantName, applicantOrganizationNumber, organizationId, documentName, description, dateOfAccomplishment, tenure, percentage, outOfPercentage, documentUrl){
         if(await this.getUserRole(ctx) !== 'applicant')
             return;
-        await this.createDocument(ctx, documentId, applicantId, applicantName, applicantOrganizationNumber, organizationId, documentName, description, dateOfAccomplishment, tenure, percentage, outOfPercentage, "Self-Uploaded", documentUrl, applicantId)
+        await this.createDocument(ctx, documentId, applicantId, applicantName, applicantOrganizationNumber, organizationId, documentName, description, dateOfAccomplishment, tenure, percentage, outOfPercentage, "Self-Uploaded", documentUrl)
     }
 
     async verifyDocument(ctx, documentId){

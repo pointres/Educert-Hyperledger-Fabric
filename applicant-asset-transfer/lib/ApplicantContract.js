@@ -176,7 +176,8 @@ class ApplicantContract extends Contract {
 
         let applicantId = await this.getUserIdentity(ctx);
         const applicant = await this.getApplicant(ctx, applicantId);
-        // unique organizationIDs in permissionGranted
+        // unique organizationIDs in 
+        console.log(applicant)
         if (!applicant.permissionGranted.includes(organizationId)) {
             applicant.permissionGranted.push(organizationId);
         }

@@ -293,17 +293,16 @@ exports.getDocumentsByApplicantId = async (request) => {
     const network = await gateway.getNetwork(request.channelName);
 
     // Get the contract from the network.
-    const contract = network.getContract(request.chaincodeName);
-    
-    let hasPermission = await contract.evaluateTransaction('hasPermission', req.data.applicantId);
+    let contract = network.getContract("applicant-asset-transfer");
+    console.log("111111111111111111111111")
+    let hasPermission = await contract.evaluateTransaction('hasPermission', request.data.applicantId);
 
+    console.log('22222222222222222222');
     if(hasPermission){
-        network = await gateway.getNetwork(request.channelName);
-
     // Get the contract from the network.
         contract = network.getContract('document-asset-transfer');
     
-        let result = await contract.evaluateTransaction('getDocumentsByApplicantId', req.data.applicantId);
+        let result = await contract.evaluateTransaction('getDocumentsByApplicantId', request.data.applicantId);
         console.log(result);
         return result;
     }
@@ -331,36 +330,19 @@ exports.createVerifiedDocument = async (request) => {
 
     // Build a network instance based on the channel where the smart contract is deployed
     const network = await gateway.getNetwork(request.channelName);
-
-    // Get the contract from the network.
-    /*
-    {
-        'applicantId':'sdad',
-        'doc Id' : 'asdas',
-    }
-    */
-   /*
-    {
-        data:{
-            'applicantId':'sdad',
-            'doc Id' : 'asdas'
-        }
-    }
-    */
-
    
-    const contract = network.getContract(request.chaincodeName);
-    let data = req.data;
+    let contract = network.getContract("applicant-asset-transfer");
+    let data = request.data;
     let hasPermission = await contract.evaluateTransaction('hasPermission', data.applicantId);
 
     if(hasPermission){
-        network = await gateway.getNetwork(request.channelName);
-
     // Get the contract from the network.
-        contract = network.getContract('document-asset-transfer');
-    
-        let result = await contract.submitTransaction('createVerifiedDocument', data.applicantId ....);
+        let contract = network.getContract('document-asset-transfer');
+        
+        let result = await contract.submitTransaction('createVerifiedDocument', data.documentId, data.applicantId, data.applicantName, data.applicantOrganizationNumber, data.organizationId, data.documentName, data.description, data.dateOfAccomplishment, data.tenure, data.percentage, data.outOfPercentage, data.documentUrl);
         console.log(result);
+        contract = network.getContract("applicant-asset-transfer");
+        await contract.submitTransaction('addDocumentIdToArray', data.applicantId, data.documentId)
         return result;
     }
     else{
@@ -387,12 +369,21 @@ exports.createSelfUploadedDocument = async (request) => {
 
     // Build a network instance based on the channel where the smart contract is deployed
     const network = await gateway.getNetwork(request.channelName);
+   
+    let data = request.data;
 
-    const contract = network.getContract(request.chaincodeName);
-    let data = req.data;
-    let result = await contract.submitTransaction('createSelfUploadedDocument', data.applicantId,.....);
+    // Get the contract from the network.
+    let contract = network.getContract('document-asset-transfer');
+    let result = await contract.submitTransaction('createSelfUploadedDocument', data.documentId, data.applicantId, data.applicantName, data.applicantOrganizationNumber, data.organizationId, data.documentName, data.description, data.dateOfAccomplishment, data.tenure, data.percentage, data.outOfPercentage, data.documentUrl);
     console.log(result);
-    return result;    
+
+    contract = network.getContract("applicant-asset-transfer");
+    await contract.submitTransaction('addDocumentIdToArray', data.applicantId, data.documentId)
+
+    return result;
+    
+
+        
 }
 
 exports.getMyDocuments = async (request) => {
@@ -419,6 +410,29 @@ exports.getMyDocuments = async (request) => {
     return result;    
 }
 
+
+exports.getDocumentsSignedByOrganization = async (request) => {
+    let organization = request.organization;
+    let num = Number(organization.match(/\d/g).join(""));
+    const ccp =getCCP(num);
+
+    const wallet = await buildWallet(Wallets, walletPath);
+
+    const gateway = new Gateway();
+
+    await gateway.connect(ccp, {
+        wallet,
+        identity: request.userId,
+        discovery: { enabled: true, asLocalhost: true } // using asLocalhost as this gateway is using a fabric network deployed locally
+    });    
+
+    const network = await gateway.getNetwork(request.channelName);
+
+    const contract = network.getContract(request.chaincodeName);
+    let result = await contract.evaluateTransaction('getDocumentsSignedByOrganization');
+    return result;    
+
+}
 
 /*
 {

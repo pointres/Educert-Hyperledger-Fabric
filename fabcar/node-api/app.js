@@ -6,7 +6,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const bodyparser = require("body-parser");
 const { registerAdmin, registerUser, userExist } = require("./registerUser");
-const { createApplicant ,verifyDocument, changeCurrentOrganization, grantAccessToOrganization, revokeAccessFromOrganization, getPermissionedApplicant, getPermissionedApplicantHistory, getCurrentApplicantsEnrolled } =require('./tx')
+const { createApplicant ,verifyDocument, changeCurrentOrganization, grantAccessToOrganization, revokeAccessFromOrganization, getPermissionedApplicant, getPermissionedApplicantHistory, getCurrentApplicantsEnrolled, getDocumentsByApplicantId, getMyDocuments, createVerifiedDocument, createSelfUploadedDocument, getDocumentsSignedByOrganization } =require('./tx')
 const { getApplicant } =require('./query')
 const {User, validateUser} = require('./models/user')
 const config_1 = require("config")
@@ -239,7 +239,7 @@ app.post("/getPermissionedApplicant",auth, async (req, res) => {
             res.status(402).send("Unauthorized operation");
         }
     } catch (error) {
-        res.status(500).send(error);
+        res.status(402).send("Unauthorized operation");
     }
 });
 
@@ -293,7 +293,7 @@ app.post("/getDocumentsByApplicantId",auth, async (req, res) => {
                 "channelName": channelName,
                 "chaincodeName": documentChaincode,
                 "userId": req.user.userId,
-                "data":req.data
+                "data":req.body.data
             }
             let result = await getDocumentsByApplicantId(payload);
             res.send(result);
@@ -334,7 +334,7 @@ app.post("/createVerifiedDocument",auth, async (req, res) => {
                 "channelName": channelName,
                 "chaincodeName": documentChaincode,
                 "userId": req.user.userId,
-                "data":req.body
+                "data":req.body.data
             }
             let result = await createVerifiedDocument(payload);
             res.send(result);
@@ -355,7 +355,7 @@ app.post("/createSelfUploadedDocument",auth, async (req, res) => {
                 "channelName": channelName,
                 "chaincodeName": documentChaincode,
                 "userId": req.user.userId,
-                "data":req.body
+                "data":req.body.data
             }
             let result = await createSelfUploadedDocument(payload);
             res.send(result);
@@ -368,26 +368,6 @@ app.post("/createSelfUploadedDocument",auth, async (req, res) => {
     }
 });
 
-app.post("/createSelfUploadedDocument",auth, async (req, res) => {
-    try {
-        if(req.user.role === 'applicant'){
-            let payload = {
-                "organization": req.user.organization,
-                "channelName": channelName,
-                "chaincodeName": documentChaincode,
-                "userId": req.user.userId,
-                "data":req.body
-            }
-            let result = await createSelfUploadedDocument(payload);
-            res.send(result);
-        }
-        else{
-            res.status(402).send("Unauthorized operation");
-        }
-    } catch (error) {
-        res.status(500).send(error);
-    }
-});
 
 app.post("/getDocumentsSignedByOrganization",auth, async (req, res) => {
     try {
