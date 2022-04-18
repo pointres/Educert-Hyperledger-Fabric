@@ -229,7 +229,7 @@ class ApplicantContract extends Contract {
         let applicant = await this.getApplicant(ctx, applicantId);
         
         if(applicant.permissionGranted.includes(organizationId)){
-            return this.fetchLimitedFieldsForOrganization(applicant);
+            return this.fetchLimitedFields(applicant);
         }
         throw new Error("Your Organization does not have permission to view this Applicant!");
     }
@@ -253,7 +253,7 @@ class ApplicantContract extends Contract {
         const buffer = await this.getQueryResultForQueryString(ctx, JSON.stringify(queryString));
         let asset = JSON.parse(buffer.toString());
 
-        return this.fetchLimitedFieldsForOrganization(asset);
+        return this.fetchLimitedFields(asset);
     }
 
     async applicantExists(ctx, applicantId) {
@@ -271,7 +271,7 @@ class ApplicantContract extends Contract {
     async getAllApplicants(ctx) {
         let resultsIterator = await ctx.stub.getStateByRange('', '');
         let asset = await this.getAllApplicantResults(resultsIterator, false);
-        return this.fetchLimitedFieldsForOrganization(asset);
+        return this.fetchLimitedFields(asset);
     }
 
     async getAllApplicantsOfOrganization(ctx){
@@ -382,7 +382,7 @@ class ApplicantContract extends Contract {
 
     }
 
-    fetchLimitedFieldsForOrganization = (asset, includeTimeStamp = false) => {
+    fetchLimitedFields = (asset, includeTimeStamp = false) => {
         for (let i = 0; i < asset.length; i++) {
             const obj = asset[i];
             asset[i] = {

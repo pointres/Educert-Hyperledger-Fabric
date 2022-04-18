@@ -6,8 +6,8 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const bodyparser = require("body-parser");
 const { registerAdmin, registerUser, userExist } = require("./registerUser");
-const { createApplicant ,verifyDocument, changeCurrentOrganization, grantAccessToOrganization, revokeAccessFromOrganization, getPermissionedApplicant, getPermissionedApplicantHistory, getCurrentApplicantsEnrolled, getDocumentsByApplicantId, getMyDocuments, createVerifiedDocument, createSelfUploadedDocument, getDocumentsSignedByOrganization } =require('./tx')
-const { getApplicant } =require('./query')
+const { createApplicant, verifyDocument,changeCurrentOrganization, grantAccessToOrganization, revokeAccessFromOrganization, createVerifiedDocument, createSelfUploadedDocument } =require('./tx')
+const { getApplicant, getDocumentsSignedByOrganization, getPermissionedApplicant, getPermissionedApplicantHistory, getCurrentApplicantsEnrolled, getDocumentsByApplicantId, getMyDocuments } =require('./query')
 const {User, validateUser} = require('./models/user')
 const config_1 = require("config")
 
@@ -28,6 +28,10 @@ app.listen(4000, () => {
     console.log("server started");
 
 })
+
+
+//**************LOGIN/SIGNUP FUNCTIONS******************** */
+
 
 app.post("/registerAdmin", async (req, res) => {
     try {
@@ -80,17 +84,8 @@ app.post("/registerViceAdmin", auth, async (req, res) => {
 
 app.post("/registerApplicant", auth, async (req, res) => {
     try {
-        console.log("azqwsxedcrfvtbgy nhujik,p,lokmijnuhbygvtfcrdexswzaqryefbvbjkdlzerihoy");
+        
         if(req.user.role === "viceAdmin"){
-            /*let applicantId = req.body.applicantinfoSignup.applicantId;
-            let email = req.body.applicantinfoSignup.email;
-            let name = req.body.applicantinfoSignup.fullName;
-            let address = req.body.applicantinfoSignup.address;
-            let pin = req.body.applicantinfoSignup.pincode;
-            let state = req.body.applicantinfoSignup.stateOfApplicant;
-            let country = req.body.applicantinfoSignup.country;
-            let contact = req.body.applicantinfoSignup.contactNumber;
-            let dateOfBirth = req.body.applicantinfoSignup.dob;*/
             let applicantId = req.body.userId;
             let password = req.body.password = "Secure@2022";
             let organization = req.body.organization;
@@ -98,7 +93,7 @@ app.post("/registerApplicant", auth, async (req, res) => {
             //generate certif
             
             let result = await registerUser({ OrgMSP: organization, userId: applicantId, role});
-            console.log(result);
+            
             //register applicant in mongo
             const {error} = validateUser({userId:applicantId, password, organization, role});
             if(error) return res.status(400).send(error.details[0].message);
@@ -159,66 +154,26 @@ app.post("/login", async (req, res) => {
     }
 });
 
-app.post("/changeCurrentOrganization",auth, async (req, res) => {
-    try {
-        if(req.user.role === 'viceAdmin'){
-            let payload = {
-                "organization": req.user.organization,
-                "channelName": channelName,
-                "chaincodeName": applicantChaincode,
-                "userId": req.user.userId,
-                "data": req.body.data,
-            }
-            let result = await changeCurrentOrganization(payload);
-            res.send(result);
-        }
-        else{
-            res.status(402).send("Unauthorized operation");
-        }
-    } catch (error) {
-        res.status(500).send(error);
-    }
-});
 
-app.post("/grantAccessToOrganization",auth, async (req, res) => {
-    try {
-        if(req.user.role === 'applicant'){
-            let payload = {
-                "organization": req.user.organization,
-                "channelName": channelName,
-                "chaincodeName": applicantChaincode,
-                "userId": req.user.userId,
-                "data": req.body.data,
-            }
-            let result = await grantAccessToOrganization(payload);
-            res.send(result);
-        }
-        else{
-            res.status(402).send("Unauthorized operation");
-        }
-    } catch (error) {
-        res.status(500).send(error);
-    }
-});
 
-app.post("/revokeAccessFromOrganization",auth, async (req, res) => {
+//**************GET APPLICANT FUNCTIONS******************** */
+
+
+app.get('/getApplicant/:applicantId/search', async (req, res) => {
     try {
-        if(req.user.role === 'applicant'){
-            let payload = {
-                "organization": req.user.organization,
-                "channelName": channelName,
-                "chaincodeName": applicantChaincode,
-                "userId": req.user.userId,
-                "data": req.body.data,
-            }
-            let result = await revokeAccessFromOrganization(payload);
-            res.send(result);
+        let payload = {
+            "org": req.query.org,
+            "channelName": channelName,
+            "chaincodeName": applicantChaincode,
+            "userId": req.query.userId,
+            "applicantId":req.params.applicantId
         }
-        else{
-            res.status(402).send("Unauthorized operation");
-        }
+
+        let result = await getApplicant(payload);
+        res.send(result);
+        
     } catch (error) {
-        res.status(500).send(error);
+        res.send(error)
     }
 });
 
@@ -285,6 +240,9 @@ app.post("/getCurrentApplicantsEnrolled",auth, async (req, res) => {
     }
 });
 
+//**************GET DOCUMENT FUNCTIONS******************** */
+
+
 app.post("/getDocumentsByApplicantId",auth, async (req, res) => {
     try {
         if(req.user.role === 'viceAdmin'){
@@ -325,6 +283,96 @@ app.post("/getMyDocuments",auth, async (req, res) => {
         res.status(500).send(error);
     }
 });
+
+app.post("/getDocumentsSignedByOrganization",auth, async (req, res) => {
+    try {
+        if(req.user.role === 'viceAdmin'){
+            let payload = {
+                "organization": req.user.organization,
+                "channelName": channelName,
+                "chaincodeName": documentChaincode,
+                "userId": req.user.userId
+            }
+            let result = await getDocumentsSignedByOrganization(payload);
+            res.send(result);
+        }
+        else{
+            res.status(402).send("Unauthorized operation");
+        }
+    } catch (error) {
+        res.status(500).send(error);
+    }
+});
+
+
+//**************APPLICANT POST FUNCTIONS******************** */
+
+
+app.post("/changeCurrentOrganization",auth, async (req, res) => {
+    try {
+        if(req.user.role === 'viceAdmin'){
+            let payload = {
+                "organization": req.user.organization,
+                "channelName": channelName,
+                "chaincodeName": applicantChaincode,
+                "userId": req.user.userId,
+                "data": req.body.data,
+            }
+            let result = await changeCurrentOrganization(payload);
+            res.send(result);
+        }
+        else{
+            res.status(402).send("Unauthorized operation");
+        }
+    } catch (error) {
+        res.status(500).send(error);
+    }
+});
+
+app.post("/grantAccessToOrganization",auth, async (req, res) => {
+    try {
+        if(req.user.role === 'applicant'){
+            let payload = {
+                "organization": req.user.organization,
+                "channelName": channelName,
+                "chaincodeName": applicantChaincode,
+                "userId": req.user.userId,
+                "data": req.body.data,
+            }
+            let result = await grantAccessToOrganization(payload);
+            res.send(result);
+        }
+        else{
+            res.status(402).send("Unauthorized operation");
+        }
+    } catch (error) {
+        res.status(500).send(error);
+    }
+});
+
+app.post("/revokeAccessFromOrganization",auth, async (req, res) => {
+    try {
+        if(req.user.role === 'applicant'){
+            let payload = {
+                "organization": req.user.organization,
+                "channelName": channelName,
+                "chaincodeName": applicantChaincode,
+                "userId": req.user.userId,
+                "data": req.body.data,
+            }
+            let result = await revokeAccessFromOrganization(payload);
+            res.send(result);
+        }
+        else{
+            res.status(402).send("Unauthorized operation");
+        }
+    } catch (error) {
+        res.status(500).send(error);
+    }
+});
+
+//**************DOCUMENT POST FUNCTIONS******************** */
+
 
 app.post("/createVerifiedDocument",auth, async (req, res) => {
     try {
@@ -368,38 +416,17 @@ app.post("/createSelfUploadedDocument",auth, async (req, res) => {
     }
 });
 
-
-app.post("/getDocumentsSignedByOrganization",auth, async (req, res) => {
+app.post("/verifyDocument",auth, async (req, res) => {
     try {
         if(req.user.role === 'viceAdmin'){
             let payload = {
-                "organization": req.user.organization,
-                "channelName": channelName,
-                "chaincodeName": documentChaincode,
-                "userId": req.user.userId
-            }
-            let result = await getDocumentsSignedByOrganization(payload);
-            res.send(result);
-        }
-        else{
-            res.status(402).send("Unauthorized operation");
-        }
-    } catch (error) {
-        res.status(500).send(error);
-    }
-});
-
-/*app.get("/getPermissionedDocument/:documentId",auth, async (req, res) => {
-    try {
-        if(req.user.role === 'applicant'){
-            let payload = {
-                "organization": req.user.organization,
+                "org": req.user.organization,
                 "channelName": channelName,
                 "chaincodeName": documentChaincode,
                 "userId": req.user.userId,
-                "documentId":req.params.documentId
+                "data": req.body.data
             }
-            let result = await getPermissionedDocument(payload);
+            let result = await verifyDocument(payload);
             res.send(result);
         }
         else{
@@ -408,145 +435,4 @@ app.post("/getDocumentsSignedByOrganization",auth, async (req, res) => {
     } catch (error) {
         res.status(500).send(error);
     }
-});
-*/
-
-// app.post("/getAllApplicantsOfOrganization",auth, async (req, res) => {
-//     try {
-//         if(request.user.role === 'viceAdmin'){
-//             let payload = {
-//                 "organization": req.user.organization,
-//                 "channelName": channelName,
-//                 "chaincodeName": applicantChaincode,
-//                 "userId": req.user.userId,
-//             }
-//             let result = await getAllApplicantsOfOrganization(payload);
-//             res.send(result);
-//         }
-//         else{
-//             res.status(402).send("Unauthorized operation");
-//         }
-//     } catch (error) {
-//         res.status(500).send(error);
-//     }
-// });
-
-
-// app.post("/verifyDocument",auth, async (req, res) => {
-//     try {
-//         if(request.user.role === 'viceAdmin'){
-//             let payload = {
-//                 "org": req.user.organization,
-//                 "channelName": channelName,
-//                 "chaincodeName": documentChaincode,
-//                 "userId": req.user.userId,
-//                 "data": req.body.data
-//             }
-//             let result = await verifyDocument(payload);
-//             res.send(result);
-//         }
-//         else{
-//             res.status(402).send("Unauthorized operation");
-//         }
-//     } catch (error) {
-//         res.status(500).send(error);
-//     }
-// })
-
-
-
-// app.post("/updateAsset", async (req, res) => {
-//     try {
-
-
-//         let payload = {
-//             "org": req.body.org,
-//             "channelName": channelName,
-//             "chaincodeName": chaincodeName,
-//             "userId": req.body.userId,
-//             "data": req.body.data
-//         }
-
-//         let result = await updateAsset(payload);
-//         res.send(result)
-//     } catch (error) {
-//         res.status(500).send(error)
-//     }
-// })
-
-
-// app.post("/transferAsset", async (req, res) => {
-
-//     try {
-
-//         let payload = {
-//             "org": req.body.org,
-//             "channelName": channelName,
-//             "chaincodeName": chaincodeName,
-//             "userId": req.body.userId,
-//             "data": req.body.data
-//         }
-
-//         let result = await TransferAsset(payload);
-//         res.send(result)
-//     } catch (error) {
-//         res.status(500).send(error)
-//     }
-// })
-
-
-// app.post("/deleteAsset", async (req, res) => {
-//     try {
-//         let payload = {
-//             "org": req.body.org,
-//             "channelName": channelName,
-//             "chaincodeName": chaincodeName,
-//             "userId": req.body.userId,
-//             "data": req.body.data
-//         }
-
-//         let result = await deleteAsset(payload);
-//         res.send(result)
-//     } catch (error) {
-//         res.status(500).send(error)
-//     }
-// })
-
-
-app.get('/getApplicant/:applicantId/search', async (req, res) => {
-    try {
-        let payload = {
-            "org": req.query.org,
-            "channelName": channelName,
-            "chaincodeName": applicantChaincode,
-            "userId": req.query.userId,
-            "applicantId":req.params.applicantId
-        }
-
-        let result = await getApplicant(payload);
-        res.send(result);
-        console.log(result)
-    } catch (error) {
-        res.send(error)
-    }
-});
-
-// app.get('/getAssetHistory', async (req, res) => {
-//     try {
-//         let payload = {
-//             "org": req.query.org,
-//             "channelName": channelName,
-//             "chaincodeName": chaincodeName,
-//             "userId": req.query.userId,
-//             "data": {
-//                 id: req.query.id
-//             }
-//         }
-
-//         let result = await GetAssetHistory(payload);
-//         res.json(result)
-//     } catch (error) {
-//         res.status(500).send(error)
-//     }
-
-// });
+})

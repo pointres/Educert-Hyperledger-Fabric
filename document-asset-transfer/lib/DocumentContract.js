@@ -40,14 +40,14 @@ class DocumentContract extends Contract {
 
     async getPermissionedDocument(ctx, documentId){
         let document = this.getDocument(ctx,documentId);
-        return this.fetchLimitedFieldsForOrganization(document);
+        return this.fetchLimitedFields(document);
     }
 
     async getMyDocument(ctx, documentId){
         let document = this.getDocument(ctx,documentId);
         if(await this.getUserRole(ctx) === "applicant"){
             if(document.applicantId === await this.getUserIdentity(ctx))
-                return this.fetchLimitedFieldsForApplicant(document);
+                return this.fetchLimitedFields(document);
             throw new Error(`You dont have permission to view the document`);
         }
         else
@@ -86,15 +86,17 @@ class DocumentContract extends Contract {
         await this.createDocument(ctx, documentId, applicantId, applicantName, applicantOrganizationNumber, organizationId, documentName, description, dateOfAccomplishment, tenure, percentage, outOfPercentage, "Self-Uploaded", documentUrl)
     }
 
+
     async verifyDocument(ctx, documentId){
         if(await this.getUserRole(ctx) !== 'viceAdmin'){
             throw new Error('Unauthorized operation');
         }
+        const document = await this.getDocument(ctx, documentId);
+        if(await this.getOrganization(ctx) !== document.organizationId)
+                 throw new Error('Unauthorized operation');
         let isDataChanged = false;
         let newStatus = "Verified";
         let userIdentity = await this.getUserIdentity(ctx);
-
-        const document = await this.getDocument(ctx, documentId);
 
         if (document.status !== newStatus) {
             document.status = newStatus;
@@ -126,7 +128,7 @@ class DocumentContract extends Contract {
         const buffer = await this.getQueryResultForQueryString(ctx, JSON.stringify(queryString));
         let asset = JSON.parse(buffer.toString());
 
-        return this.fetchLimitedFieldsForOrganization(asset);
+        return this.fetchLimitedFields(asset);
     }
 
     async getMyDocuments(ctx) {
@@ -138,7 +140,7 @@ class DocumentContract extends Contract {
         const buffer = await this.getQueryResultForQueryString(ctx, JSON.stringify(queryString));
         let asset = JSON.parse(buffer.toString());
 
-        return this.fetchLimitedFieldsForApplicant(asset);
+        return this.fetchLimitedFields(asset);
     }
 
     async getDocumentsSignedByOrganization(ctx) {
@@ -153,13 +155,13 @@ class DocumentContract extends Contract {
         const buffer = await this.getQueryResultForQueryString(ctx, JSON.stringify(queryString));
         let asset = JSON.parse(buffer.toString());
 
-        return this.fetchLimitedFieldsForOrganization(asset);
+        return this.fetchLimitedFields(asset);
     }
 
     async getAllDocuments(ctx) {
         let resultsIterator = await ctx.stub.getStateByRange('', '');
         let asset = await this.getAllDocumentResults(resultsIterator, false);
-        return this.fetchLimitedFieldsForOrganization(asset);
+        return this.fetchLimitedFields(asset);
     }
 
     async getDocumentHistory(ctx, documentId) {
@@ -249,7 +251,7 @@ class DocumentContract extends Contract {
     }
 
 
-    fetchLimitedFieldsForOrganization = (asset, includeTimeStamp = false) => {
+    fetchLimitedFields = (asset, includeTimeStamp = false) => {
         for (let i = 0; i < asset.length; i++) {
             const obj = asset[i];
             asset[i] = {
@@ -269,34 +271,6 @@ class DocumentContract extends Contract {
                 documentUrl: obj.Record.documentUrl,
                 updatedBy : obj.Record.updatedBy
             };
-            if (includeTimeStamp) {
-                //asset[i].changedBy = obj.Record.changedBy;
-                asset[i].Timestamp = obj.Timestamp;
-            }
-        }
-
-        return asset;
-    };
-
-    fetchLimitedFieldsForApplicant = (asset, includeTimeStamp = false) => {
-        for (let i = 0; i < asset.length; i++) {
-            const obj = asset[i];
-            asset[i] = {
-                documentId: obj.Key,
-                documentHash: obj.Record.documentHash,
-                applicantId: obj.Record.applicantId,
-                applicantName: obj.Record.applicantName,
-                applicantOrganizationNumber: obj.Record.applicantOrganizationNumber,
-                organizationId: obj.Record.organizationId,
-                documentName: obj.Record.documentName,
-                description: obj.Record.description,
-                dateOfAccomplishment : obj.Record.dateOfAccomplishment,
-                tenure: obj.Record.tenure,
-                percentage: obj.Record.percentage,
-                outOfPercentage: obj.Record.outOfPercentage,
-                status: obj.Record.status,
-                documentUrl: obj.Record.documentUrl,
-                updatedBy : obj.Record.updatedBy            };
             if (includeTimeStamp) {
                 //asset[i].changedBy = obj.Record.changedBy;
                 asset[i].Timestamp = obj.Timestamp;
