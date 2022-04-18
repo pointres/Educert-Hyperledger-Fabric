@@ -16,7 +16,6 @@ class Document {
         this.outOfPercentage = outOfPercentage,
         this.status = status,
         this.documentURL = documentURL,
-        this.permissionGranted = [organizationId],
         this.updatedBy = updatedBy
         return this;
     }

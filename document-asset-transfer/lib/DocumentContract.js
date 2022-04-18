@@ -40,17 +40,20 @@ class DocumentContract extends Contract {
 
     async getPermissionedDocument(ctx, documentId){
         let document = this.getDocument(ctx,documentId);
+        return this.fetchLimitedFieldsForOrganization(document);
+    }
+
+    async getMyDocument(ctx, documentId){
+        let document = this.getDocument(ctx,documentId);
         if(await this.getUserRole(ctx) === "applicant"){
             if(document.applicantId === await this.getUserIdentity(ctx))
                 return this.fetchLimitedFieldsForApplicant(document);
             throw new Error(`You dont have permission to view the document`);
         }
-        else{
-            if(document.permissionGranted.includes(await this.getOrganization(ctx)))
-                return this.fetchLimitedFieldsForOrganization(document);
+        else
             throw new Error(`You dont have permission to view the document`);
-        }
     }
+    
 
     async documentExists(ctx, documentId) {
         const buffer = await ctx.stub.getState(documentId);
@@ -60,7 +63,7 @@ class DocumentContract extends Contract {
     async createDocument(ctx, documentId, applicantId, applicantName, applicantOrganizationNumber, organizationId, documentName, description, dateOfAccomplishment, tenure, percentage, outOfPercentage, status, documentUrl){
         
         let userId = await this.getUserIdentity(ctx);
-        let newDocument = await new Document(documentId, "documentHash", applicantId, applicantName, applicantOrganizationNumber, organizationId, documentName, description, dateOfAccomplishment, tenure, percentage, outOfPercentage, status, documentUrl, userId);
+        let newDocument = new Document(documentId, "documentHash", applicantId, applicantName, applicantOrganizationNumber, organizationId, documentName, description, dateOfAccomplishment, tenure, percentage, outOfPercentage, status, documentUrl, userId);
         const exists = await this.documentExists(ctx, newDocument.documentId);
 
         if (exists) {
@@ -84,7 +87,7 @@ class DocumentContract extends Contract {
     }
 
     async verifyDocument(ctx, documentId){
-        if(await this.getUserRole(ctx) !== 'viceAdmin' || !document.permissionGranted.includes(await this.getOrganization(ctx))){
+        if(await this.getUserRole(ctx) !== 'viceAdmin'){
             throw new Error('Unauthorized operation');
         }
         let isDataChanged = false;
@@ -115,6 +118,8 @@ class DocumentContract extends Contract {
     }
 
     async getDocumentsByApplicantId(ctx, applicantId) {
+        if(await this.getUserRole(ctx) !== 'viceAdmin')
+            throw new Error('You dont have permission to view documents');
         let queryString = {};
         queryString.selector = {};
         queryString.selector.applicantId = applicantId;
@@ -164,7 +169,7 @@ class DocumentContract extends Contract {
         return asset;
     }
 
-    async getPermissionedDocumentHistory(ctx, documentId){
+    /*async getPermissionedDocumentHistory(ctx, documentId){
         let role = await this.getUserRole(ctx);
         if(role === 'viceAdmin'){
             let organizationId = await this.getOrganization(ctx);
@@ -184,7 +189,7 @@ class DocumentContract extends Contract {
             else
                 throw new Error('You dont have permission to view this document');
         }
-    }
+    }*/
 
     async getAllDocumentResults(iterator, isHistory) {
         let allResults = [];
@@ -291,9 +296,7 @@ class DocumentContract extends Contract {
                 outOfPercentage: obj.Record.outOfPercentage,
                 status: obj.Record.status,
                 documentUrl: obj.Record.documentUrl,
-                updatedBy : obj.Record.updatedBy,
-                permissionGranted : obj.Record.permissionGranted
-            };
+                updatedBy : obj.Record.updatedBy            };
             if (includeTimeStamp) {
                 //asset[i].changedBy = obj.Record.changedBy;
                 asset[i].Timestamp = obj.Timestamp;

@@ -233,6 +233,12 @@ class ApplicantContract extends Contract {
         throw new Error("Your Organization does not have permission to view this Applicant!");
     }
 
+    async getMyDetails(ctx){
+        if(await this.getUserRole(ctx) !== 'applicant')
+            throw new Error("Your dont not have permission to view this Applicant!");
+         return await this.getApplicant(ctx, await this.getUserIdentity(ctx));
+    }
+
     async getCurrentApplicantsEnrolled(ctx){
         let role = await this.getUserRole(ctx);
         if(role !== 'viceAdmin'){
@@ -288,6 +294,17 @@ class ApplicantContract extends Contract {
             return await this.getApplicantHistory(ctx, applicantId);
         }
     }
+
+    async getMyHistory(ctx){
+        let role = await this.getUserRole(ctx);
+        if(role !== 'applicant'){
+            return;
+        }
+
+        let applicantId = await this.getUserIdentity(ctx);
+        return await this.getApplicantHistory(ctx, applicantId);
+    }
+
 
     async getApplicantHistory(ctx, applicantId) {
         let resultsIterator = await ctx.stub.getHistoryForKey(applicantId);
@@ -351,6 +368,17 @@ class ApplicantContract extends Contract {
         const ClientIdentity = require('fabric-shim').ClientIdentity;
         let cid = new ClientIdentity(ctx.stub);
         return cid.getAttributeValue('role');
+    }
+
+    async hasPermission(ctx, applicantId){
+        if(await this.getUserRole(ctx) === 'viceAdmin'){
+            let organizationId = await this.getOrganization(ctx);
+            let applicant = await this.getApplicant(ctx, applicantId);
+            return applicant.permissionGranted.includes(organizationId)
+        }
+        else
+            throw new Error("Unauthorized access");
+
     }
 
     fetchLimitedFieldsForOrganization = (asset, includeTimeStamp = false) => {

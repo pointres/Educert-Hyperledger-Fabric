@@ -285,6 +285,152 @@ app.post("/getCurrentApplicantsEnrolled",auth, async (req, res) => {
     }
 });
 
+app.post("/getDocumentsByApplicantId",auth, async (req, res) => {
+    try {
+        if(req.user.role === 'viceAdmin'){
+            let payload = {
+                "organization": req.user.organization,
+                "channelName": channelName,
+                "chaincodeName": documentChaincode,
+                "userId": req.user.userId,
+                "data":req.data
+            }
+            let result = await getDocumentsByApplicantId(payload);
+            res.send(result);
+        }
+        else{
+            res.status(402).send("Unauthorized operation");
+        }
+    } catch (error) {
+        res.status(500).send(error);
+    }
+});
+
+app.post("/getMyDocuments",auth, async (req, res) => {
+    try {
+        if(req.user.role === 'applicant'){
+            let payload = {
+                "organization": req.user.organization,
+                "channelName": channelName,
+                "chaincodeName": documentChaincode,
+                "userId": req.user.userId
+            }
+            let result = await getMyDocuments(payload);
+            res.send(result);
+        }
+        else{
+            res.status(402).send("Unauthorized operation");
+        }
+    } catch (error) {
+        res.status(500).send(error);
+    }
+});
+
+app.post("/createVerifiedDocument",auth, async (req, res) => {
+    try {
+        if(req.user.role === 'viceAdmin'){
+            let payload = {
+                "organization": req.user.organization,
+                "channelName": channelName,
+                "chaincodeName": documentChaincode,
+                "userId": req.user.userId,
+                "data":req.body
+            }
+            let result = await createVerifiedDocument(payload);
+            res.send(result);
+        }
+        else{
+            res.status(402).send("Unauthorized operation");
+        }
+    } catch (error) {
+        res.status(500).send(error);
+    }
+});
+
+app.post("/createSelfUploadedDocument",auth, async (req, res) => {
+    try {
+        if(req.user.role === 'applicant'){
+            let payload = {
+                "organization": req.user.organization,
+                "channelName": channelName,
+                "chaincodeName": documentChaincode,
+                "userId": req.user.userId,
+                "data":req.body
+            }
+            let result = await createSelfUploadedDocument(payload);
+            res.send(result);
+        }
+        else{
+            res.status(402).send("Unauthorized operation");
+        }
+    } catch (error) {
+        res.status(500).send(error);
+    }
+});
+
+app.post("/createSelfUploadedDocument",auth, async (req, res) => {
+    try {
+        if(req.user.role === 'applicant'){
+            let payload = {
+                "organization": req.user.organization,
+                "channelName": channelName,
+                "chaincodeName": documentChaincode,
+                "userId": req.user.userId,
+                "data":req.body
+            }
+            let result = await createSelfUploadedDocument(payload);
+            res.send(result);
+        }
+        else{
+            res.status(402).send("Unauthorized operation");
+        }
+    } catch (error) {
+        res.status(500).send(error);
+    }
+});
+
+app.post("/getDocumentsSignedByOrganization",auth, async (req, res) => {
+    try {
+        if(req.user.role === 'viceAdmin'){
+            let payload = {
+                "organization": req.user.organization,
+                "channelName": channelName,
+                "chaincodeName": documentChaincode,
+                "userId": req.user.userId
+            }
+            let result = await getDocumentsSignedByOrganization(payload);
+            res.send(result);
+        }
+        else{
+            res.status(402).send("Unauthorized operation");
+        }
+    } catch (error) {
+        res.status(500).send(error);
+    }
+});
+
+/*app.get("/getPermissionedDocument/:documentId",auth, async (req, res) => {
+    try {
+        if(req.user.role === 'applicant'){
+            let payload = {
+                "organization": req.user.organization,
+                "channelName": channelName,
+                "chaincodeName": documentChaincode,
+                "userId": req.user.userId,
+                "documentId":req.params.documentId
+            }
+            let result = await getPermissionedDocument(payload);
+            res.send(result);
+        }
+        else{
+            res.status(402).send("Unauthorized operation");
+        }
+    } catch (error) {
+        res.status(500).send(error);
+    }
+});
+*/
+
 // app.post("/getAllApplicantsOfOrganization",auth, async (req, res) => {
 //     try {
 //         if(request.user.role === 'viceAdmin'){
