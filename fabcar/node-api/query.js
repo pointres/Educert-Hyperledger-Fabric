@@ -175,14 +175,14 @@ exports.getMyDocuments = async (request) => {
 
     const contract = network.getContract(request.chaincodeName);
     let result = await contract.evaluateTransaction('getMyDocuments');
-    
+    console.log(result)
     return result;    
 }
 
 
 exports.getDocumentsSignedByOrganization = async (request) => {
-    let org = request.org;
-    let num = Number(org.match(/\d/g).join(""));
+    let organization = request.organization;
+    let num = Number(organization.match(/\d/g).join(""));
     const ccp = getCCP(num);
     const wallet = await buildWallet(Wallets, walletPath);
 	
@@ -190,7 +190,7 @@ exports.getDocumentsSignedByOrganization = async (request) => {
 	
     await gateway.connect(ccp, {
         wallet,
-        identity:'admin',
+        identity:request.userId,
         discovery: { enabled: true, asLocalhost: true }
     });
 	

@@ -135,6 +135,10 @@ app.post("/login", async (req, res) => {
         }
         */
         let { userId, password, organization, role } = req.body;
+        console.log(userId)
+        console.log(password)
+        console.log(organization)
+        console.log(role)
         const {error} = validateUser(req.body);
         if(error) return res.status(400).send(error.details[0].message);
 
@@ -145,8 +149,8 @@ app.post("/login", async (req, res) => {
         if(!validPassword) return res.status(400).send("Incorrect Username or Password");
 
         const token = jwt.sign({ userId: user.userId, organization : user.organization, role: user.role}, config_1.get('jwtPrivateKey'));
-        
-        res.send(token);
+        console.log(token)
+        res.header('x-auth-token', token).send(token);
 
     } 
     catch (error) {
