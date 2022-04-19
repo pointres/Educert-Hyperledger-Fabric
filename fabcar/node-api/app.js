@@ -6,8 +6,8 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const bodyparser = require("body-parser");
 const { registerAdmin, registerUser, userExist } = require("./registerUser");
-const { createApplicant, verifyDocument,changeCurrentOrganization, grantAccessToOrganization, revokeAccessFromOrganization, createVerifiedDocument, createSelfUploadedDocument } =require('./tx')
-const { getApplicant, getDocumentsSignedByOrganization, getPermissionedApplicant, getPermissionedApplicantHistory, getCurrentApplicantsEnrolled, getDocumentsByApplicantId, getMyDocuments } =require('./query')
+const { createApplicant, verifyDocument,changeCurrentOrganization, grantAccessToOrganization, revokeAccessFromOrganization, createVerifiedDocument, createSelfUploadedDocument, updateApplicantPersonalDetails } =require('./tx')
+const { getMyDetails, getDocumentsSignedByOrganization, getPermissionedApplicant, getPermissionedApplicantHistory, getCurrentApplicantsEnrolled, getDocumentsByApplicantId, getMyDocuments } =require('./query')
 const {User, validateUser} = require('./models/user')
 const config_1 = require("config")
 
@@ -159,19 +159,22 @@ app.post("/login", async (req, res) => {
 //**************GET APPLICANT FUNCTIONS******************** */
 
 
-app.get('/getApplicant/:applicantId/search', async (req, res) => {
+app.post('/getMyDetails', auth, async (req, res) => {
     try {
-        let payload = {
-            "org": req.query.org,
-            "channelName": channelName,
-            "chaincodeName": applicantChaincode,
-            "userId": req.query.userId,
-            "applicantId":req.params.applicantId
+        if(req.user.role === 'applicant'){
+            let payload = {
+                "organization": req.user.organization,
+                "channelName": channelName,
+                "chaincodeName": applicantChaincode,
+                "userId": req.user.userId
+            }
+            let result = await getMyDetails(payload);
+            res.send(result);
+        }
+        else{
+            res.status(402).send("Unauthorized operation");
         }
 
-        let result = await getApplicant(payload);
-        res.send(result);
-        
     } catch (error) {
         res.send(error)
     }
@@ -307,6 +310,26 @@ app.post("/getDocumentsSignedByOrganization",auth, async (req, res) => {
 
 //**************APPLICANT POST FUNCTIONS******************** */
 
+app.post("/updateApplicantPersonalDetails", auth, async (req, res) => {
+    try{
+        if(req.user.role === 'applicant'){
+            let payload = {
+                "organization": req.user.organization,
+                "channelName": channelName,
+                "chaincodeName": applicantChaincode,
+                "userId": req.user.userId,
+                "data": req.body.data
+            }
+            let result = await updateApplicantPersonalDetails(payload);
+            res.send(result);
+        }
+        else{
+            res.status(402).send("Unauthorized operation");
+        }
+    }catch (error){
+        res.status(500).send(error);
+    }
+});
 
 app.post("/changeCurrentOrganization",auth, async (req, res) => {
     try {

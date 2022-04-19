@@ -10,9 +10,9 @@ const { buildWallet } = require('./AppUtils')
 
 //**************GET APPLICANT FUNCTIONS******************** */
 
-exports.getApplicant = async (request) => {
-    let org = request.org;
-    let num = Number(org.match(/\d/g).join(""));
+exports.getMyDetails = async (request) => {
+    let organization = request.organization;
+    let num = Number(organization.match(/\d/g).join(""));
     const ccp = getCCP(num);
     const wallet = await buildWallet(Wallets, walletPath);
 	
@@ -20,7 +20,7 @@ exports.getApplicant = async (request) => {
 	
     await gateway.connect(ccp, {
         wallet,
-        identity:'admin',
+        identity:request.userId,
         discovery: { enabled: true, asLocalhost: true }
     });
 	
@@ -29,7 +29,7 @@ exports.getApplicant = async (request) => {
     // Get the contract from the network.
     const contract = network.getContract(request.chaincodeName);
 	
-    let result = await contract.evaluateTransaction("getApplicant",request.applicantId);
+    let result = await contract.evaluateTransaction("getMyDetails");
     return JSON.parse(result);
 }
 
