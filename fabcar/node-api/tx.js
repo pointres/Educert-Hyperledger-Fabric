@@ -113,12 +113,14 @@ exports.grantAccessToOrganization = async (request) => {
 
     // Build a network instance based on the channel where the smart contract is deployed
     const network = await gateway.getNetwork(request.channelName);
-
+    const channel = await network.getChannel();
+    const mspids = await channel.getMspids();
     // Get the contract from the network.
     const contract = network.getContract(request.chaincodeName);
     
     let result = await contract.submitTransaction('grantAccessToOrganization',request.data.organizationId);
-    
+    result.mspids = mspids;
+    console.log(result)   
     return result;
 }
 

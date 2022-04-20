@@ -96,7 +96,7 @@ class ApplicantContract extends Contract {
 		let newCountry = args.country;
 		let newContact = args.contact;
 
-		const applicant = await this.createApplicant(ctx, applicantId)
+		const applicant = await this.getApplicant(ctx, applicantId)
 		if (newName !== null && newName !== '' && applicant.name !== newName) {
 		    applicant.name = newName;
 		    isDataChanged = true;
