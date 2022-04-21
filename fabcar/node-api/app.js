@@ -7,7 +7,7 @@ const jwt = require('jsonwebtoken');
 const bodyparser = require("body-parser");
 const { registerAdmin, registerUser, userExist } = require("./registerUser");
 const { createApplicant, verifyDocument,changeCurrentOrganization, grantAccessToOrganization, revokeAccessFromOrganization, createVerifiedDocument, createSelfUploadedDocument, updateApplicantPersonalDetails, updateMyPassword } =require('./tx')
-const { getMyDetails, getDocumentsSignedByOrganization, getPermissionedApplicant, getPermissionedApplicantHistory, getCurrentApplicantsEnrolled, getDocumentsByApplicantId, getMyDocuments } =require('./query')
+const { getMyDetails, getDocumentsSignedByOrganization, getPermissionedApplicant, getPermissionedApplicantHistory, getCurrentApplicantsEnrolled, getDocumentsByApplicantId, getMyDocuments , hasMyPermission} =require('./query')
 const {User, validateUser} = require('./models/user')
 const config_1 = require("config")
 
@@ -136,14 +136,15 @@ app.post("/login", async (req, res) => {
         }
         */
         let { userId, password, organization, role } = req.body;
-        console.log(userId)
-        console.log(password)
-        console.log(organization)
-        console.log(role)
         const {error} = validateUser(req.body);
         if(error) return res.status(400).send(error.details[0].message);
 
-        let user = await User.findOne({ userId : userId, organization: organization, role: role });
+        let user = {};
+        if(role === 'applicant')
+            user = await User.findOne({ userId : userId, role: role });
+        else
+            user = await User.findOne({ userId : userId, organization: organization, role: role });
+            
         if(!user) return res.status(400).send("Incorrect Username or Password");
 
         const validPassword = await bcrypt.compare(password, user.password );
@@ -159,6 +160,20 @@ app.post("/login", async (req, res) => {
     }
 });
 
+
+app.post("/getViceAdmins",auth, async (req, res) => {
+    try {
+        if(req.user.role === 'admin'){
+            let result = await User.find({organization:req.user.organization, role:'viceAdmin'})
+            res.send(result);
+        }
+        else{
+            res.status(402).send("Unauthorized operation");
+        }
+    } catch (error) {
+        res.status(500).send(error);
+    }
+});
 
 
 //**************GET APPLICANT FUNCTIONS******************** */
@@ -406,6 +421,8 @@ app.post("/grantAccessToOrganization",auth, async (req, res) => {
     }
 });
 
+
+
 app.post("/revokeAccessFromOrganization",auth, async (req, res) => {
     try {
         if(req.user.role === 'applicant'){
@@ -417,6 +434,27 @@ app.post("/revokeAccessFromOrganization",auth, async (req, res) => {
                 "data": req.body.data,
             }
             let result = await revokeAccessFromOrganization(payload);
+            res.send(result);
+        }
+        else{
+            res.status(402).send("Unauthorized operation");
+        }
+    } catch (error) {
+        res.status(500).send(error);
+    }
+});
+
+app.post("/hasMyPermission",auth, async (req, res) => {
+    try {
+        if(req.user.role === 'applicant'){
+            let payload = {
+                "organization": req.user.organization,
+                "channelName": channelName,
+                "chaincodeName": applicantChaincode,
+                "userId": req.user.userId,
+                "data": req.body.data,
+            }
+            let result = await hasMyPermission(payload);
             res.send(result);
         }
         else{

@@ -23,7 +23,7 @@ exports.getMyDetails = async (request) => {
         identity:request.userId,
         discovery: { enabled: true, asLocalhost: true }
     });
-	
+
     // Build a network instance based on the channel where the smart contract is deployed
     const network = await gateway.getNetwork(request.channelName);
     // Get the contract from the network.
@@ -41,21 +41,17 @@ exports.getPermissionedApplicant = async (request) => {
     const wallet = await buildWallet(Wallets, walletPath);
 
     const gateway = new Gateway();
-
     await gateway.connect(ccp, {
         wallet,
         identity: request.userId,
         discovery: { enabled: true, asLocalhost: true } // using asLocalhost as this gateway is using a fabric network deployed locally
     });
 
-    // Build a network instance based on the channel where the smart contract is deployed
     const network = await gateway.getNetwork(request.channelName);
 
-    // Get the contract from the network.
     const contract = network.getContract(request.chaincodeName);
     
     let result = await contract.submitTransaction('getPermissionedApplicant',request.data.applicantId);
-    
     return result;
 }
 
@@ -67,17 +63,15 @@ exports.getPermissionedApplicantHistory = async (request) => {
     const wallet = await buildWallet(Wallets, walletPath);
 
     const gateway = new Gateway();
-
     await gateway.connect(ccp, {
         wallet,
         identity: request.userId,
-        discovery: { enabled: true, asLocalhost: true } // using asLocalhost as this gateway is using a fabric network deployed locally
+        discovery: { enabled: true, asLocalhost: true } 
     });
 
-    // Build a network instance based on the channel where the smart contract is deployed
+    
     const network = await gateway.getNetwork(request.channelName);
 
-    // Get the contract from the network.
     const contract = network.getContract(request.chaincodeName);
     
     let result = await contract.submitTransaction('getPermissionedApplicantHistory',request.data.applicantId);
@@ -93,20 +87,38 @@ exports.getCurrentApplicantsEnrolled = async (request) => {
     const wallet = await buildWallet(Wallets, walletPath);
 
     const gateway = new Gateway();
-
     await gateway.connect(ccp, {
         wallet,
         identity: request.userId,
-        discovery: { enabled: true, asLocalhost: true } // using asLocalhost as this gateway is using a fabric network deployed locally
+        discovery: { enabled: true, asLocalhost: true } 
     });
 
-    // Build a network instance based on the channel where the smart contract is deployed
+    const network = await gateway.getNetwork(request.channelName);
+    const contract = network.getContract(request.chaincodeName);
+    let result = await contract.submitTransaction('getCurrentApplicantsEnrolled'); 
+    return result;
+}
+
+exports.hasMyPermission = async (request) => {
+    let organization = request.organization;
+    let num = Number(organization.match(/\d/g).join(""));
+    const ccp = getCCP(num);
+
+    const wallet = await buildWallet(Wallets, walletPath);
+
+    const gateway = new Gateway();
+    await gateway.connect(ccp, {
+        wallet,
+        identity: request.userId,
+        discovery: { enabled: true, asLocalhost: true } 
+    });
+
+    
     const network = await gateway.getNetwork(request.channelName);
 
-    // Get the contract from the network.
     const contract = network.getContract(request.chaincodeName);
     
-    let result = await contract.submitTransaction('getCurrentApplicantsEnrolled');
+    let result = await contract.evaluateTransaction('hasMyPermission',request.data.organizationId);
     
     return result;
 }
@@ -124,24 +136,18 @@ exports.getDocumentsByApplicantId = async (request) => {
     const wallet = await buildWallet(Wallets, walletPath);
 
     const gateway = new Gateway();
-
     await gateway.connect(ccp, {
         wallet,
         identity: request.userId,
-        discovery: { enabled: true, asLocalhost: true } // using asLocalhost as this gateway is using a fabric network deployed locally
+        discovery: { enabled: true, asLocalhost: true } 
     });
 
-    // Build a network instance based on the channel where the smart contract is deployed
     const network = await gateway.getNetwork(request.channelName);
 
-    // Get the contract from the network.
     let contract = network.getContract("applicant-asset-transfer");
     
     let hasPermission = await contract.evaluateTransaction('hasPermission', request.data.applicantId);
-
-    
     if(hasPermission){
-    // Get the contract from the network.
         contract = network.getContract('document-asset-transfer');
         console.log(request.data.applicantId)
         let result = await contract.evaluateTransaction('getDocumentsByApplicantId', request.data.applicantId);
@@ -163,19 +169,15 @@ exports.getMyDocuments = async (request) => {
     const wallet = await buildWallet(Wallets, walletPath);
 
     const gateway = new Gateway();
-
     await gateway.connect(ccp, {
         wallet,
         identity: request.userId,
-        discovery: { enabled: true, asLocalhost: true } // using asLocalhost as this gateway is using a fabric network deployed locally
+        discovery: { enabled: true, asLocalhost: true } 
     });
 
-    // Build a network instance based on the channel where the smart contract is deployed
     const network = await gateway.getNetwork(request.channelName);
-
     const contract = network.getContract(request.chaincodeName);
     let result = await contract.evaluateTransaction('getMyDocuments');
-    console.log(result)
     return result;    
 }
 
@@ -187,16 +189,13 @@ exports.getDocumentsSignedByOrganization = async (request) => {
     const wallet = await buildWallet(Wallets, walletPath);
 	
     const gateway = new Gateway();
-	
     await gateway.connect(ccp, {
         wallet,
         identity:request.userId,
         discovery: { enabled: true, asLocalhost: true }
     });
 	
-    // Build a network instance based on the channel where the smart contract is deployed
     const network = await gateway.getNetwork(request.channelName);
-    // Get the contract from the network.
     const contract = network.getContract(request.chaincodeName);
     let result = await contract.evaluateTransaction("getDocumentsSignedByOrganization");
     return JSON.parse(result);

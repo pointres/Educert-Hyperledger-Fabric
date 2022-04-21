@@ -22,7 +22,7 @@ const User = mongoose.model('User', new mongoose.Schema({
     organization: {
         type: String,
         required: true,
-        minlength: 5,
+        minlength: 1,
         maxlength: 1024
     },
     role: {
@@ -37,7 +37,7 @@ function validateUser(user) {
     const schema = Joi.object({
         userId: Joi.string().min(5).max(255).required(),
         password: Joi.string().min(5).max(1024).required(),
-        organization: Joi.string().min(5).max(1024).required(),
+        organization: Joi.string().min(1).max(1024).required(),
         role: Joi.string().min(2).max(10).required()
     });
     return schema.validate(user);
