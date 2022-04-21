@@ -140,6 +140,20 @@ class ApplicantContract extends Contract {
 		await ctx.stub.putState(applicantId, buffer);
     }
 
+    async updateMyPassword(ctx, password) {
+        let applicantId = await this.getUserIdentity(ctx)
+
+        if (password === null || password === '') {
+            throw new Error(`Empty or null values should not be passed for password`);
+        }
+
+        const applicant = await this.getApplicant(ctx, applicantId);
+        applicant.password = password;
+        applicant.updatedBy = applicantId;
+        const buffer = Buffer.from(JSON.stringify(applicant));
+        await ctx.stub.putState(applicantId, buffer);
+    }
+
     async changeCurrentOrganization(ctx, applicantId){
 
         if(await this.getUserRole(ctx) !== 'viceAdmin'){

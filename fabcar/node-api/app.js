@@ -6,7 +6,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const bodyparser = require("body-parser");
 const { registerAdmin, registerUser, userExist } = require("./registerUser");
-const { createApplicant, verifyDocument,changeCurrentOrganization, grantAccessToOrganization, revokeAccessFromOrganization, createVerifiedDocument, createSelfUploadedDocument, updateApplicantPersonalDetails } =require('./tx')
+const { createApplicant, verifyDocument,changeCurrentOrganization, grantAccessToOrganization, revokeAccessFromOrganization, createVerifiedDocument, createSelfUploadedDocument, updateApplicantPersonalDetails, updateMyPassword } =require('./tx')
 const { getMyDetails, getDocumentsSignedByOrganization, getPermissionedApplicant, getPermissionedApplicantHistory, getCurrentApplicantsEnrolled, getDocumentsByApplicantId, getMyDocuments } =require('./query')
 const {User, validateUser} = require('./models/user')
 const config_1 = require("config")
@@ -114,6 +114,7 @@ app.post("/registerApplicant", auth, async (req, res) => {
             //let result = await createApplicant({ applicantId, email, password, name, address, pin, state, country, contact, dateOfBirth });
             req.channelName =  channelName;
             req.chaincodeName = applicantChaincode;
+            req.body.password = user.password;
             result = await createApplicant(req);
             return res.send(result);
         }
@@ -334,6 +335,34 @@ app.post("/updateApplicantPersonalDetails", auth, async (req, res) => {
         res.status(500).send(error);
     }
 });
+
+
+app.post("/updateMyPassword", auth, async (req, res) => {
+    try{
+        if(req.user.role === 'applicant'){
+            const salt = await bcrypt.genSalt(10);
+            let newPassword = await bcrypt.hash(req.body.data.password, salt);
+            req.body.data.password = newPassword;
+            await User.updateOne({"userId" : req.user.userId},{$set:{password:newPassword}});
+
+            let payload = {
+                "organization": req.user.organization,
+                "channelName": channelName,
+                "chaincodeName": applicantChaincode,
+                "userId": req.user.userId,
+                "data": req.body.data
+            }
+            let result = await updateMyPassword(payload);
+            res.send(result);
+        }
+        else{
+            res.status(402).send("Unauthorized operation");
+        }
+    }catch (error){
+        res.status(500).send(error);
+    }
+});
+
 
 app.post("/changeCurrentOrganization",auth, async (req, res) => {
     try {
