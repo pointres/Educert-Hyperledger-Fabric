@@ -385,6 +385,16 @@ class ApplicantContract extends Contract {
         return cid.getAttributeValue('role');
     }
 
+    async hasMyPermission(ctx, organizationId){
+        if(await this.getUserRole(ctx) === 'applicant'){
+            let userId = await this.getUserIdentity(ctx);
+            let applicant = await this.getApplicant(ctx, userId);
+            return applicant.permissionGranted.includes(organizationId)
+        }
+        else
+            throw new Error("Unauthorized access");
+    }
+
     async hasPermission(ctx, applicantId){
         if(await this.getUserRole(ctx) === 'viceAdmin'){
             let organizationId = await this.getOrganization(ctx);
@@ -393,7 +403,6 @@ class ApplicantContract extends Contract {
         }
         else
             throw new Error("Unauthorized access");
-
     }
 
     fetchLimitedFields = (asset, includeTimeStamp = false) => {
