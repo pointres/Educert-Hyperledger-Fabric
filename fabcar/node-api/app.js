@@ -53,12 +53,12 @@ app.post("/registerAdmin", async (req, res) => {
 app.post("/registerViceAdmin", auth, async (req, res) => {
     try {
         if(req.user.role === 'admin'){
-            let {userId, password, organization} = req.body;
+            let {userId, password} = req.body;
 
             const {error} = validateUser(req.body);
             if(error) return res.status(400).send(error.details[0].message);
 
-            let user = await User.findOne({ userId : userId, organization: organization, role:"viceAdmin"});
+            let user = await User.findOne({ userId : userId, organization: req.user.organization, role:"viceAdmin"});
             if(user) return res.status(400).send("User already registered");
 
             user = new User({
@@ -70,7 +70,7 @@ app.post("/registerViceAdmin", auth, async (req, res) => {
 
         //generating certificate
         //todo check if admin is loggedIn and not the viceadmin jo currently likha hai
-            let result = await registerUser({ OrgMSP: organization, userId, role: "viceAdmin" });
+            let result = await registerUser({ OrgMSP: req.user.organization, userId, role: "viceAdmin" });
             res.send(result);
         }
         else{
