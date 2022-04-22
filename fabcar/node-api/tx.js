@@ -214,6 +214,7 @@ exports.revokeAccessFromOrganization = async (request) => {
 exports.createVerifiedDocument = async (request) => {
     let organization = request.organization;
     let num = Number(organization.match(/\d/g).join(""));
+    
     const ccp = getCCP(num);
 
     const wallet = await buildWallet(Wallets, walletPath);

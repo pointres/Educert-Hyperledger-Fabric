@@ -11,6 +11,31 @@ const { getMyDetails, getDocumentsSignedByOrganization, getPermissionedApplicant
 const {User, validateUser} = require('./models/user')
 const config_1 = require("config")
 
+var multer = require("multer");
+var storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "temp_image");
+  },
+  filename: function (req, file, cb) {
+    cb(null, req.body.data.data.documentId);
+  },
+});
+
+
+const fs = require("fs");
+const path = require("path");
+ 
+// Creating server to accept request
+
+ 
+// Listening to the PORT: 3000
+
+var upload = multer({ storage: storage }).array("file");
+// var upload = multer({storage: storage});
+
+const { BlobServiceClient, BlobSASPermissions } = require('@azure/storage-blob');
+
+
 const applicantChaincode = "applicant-asset-transfer";
 const documentChaincode = "document-asset-transfer";
 const channelName = "mychannel"
@@ -28,6 +53,8 @@ app.listen(4000, () => {
     console.log("server started");
 
 })
+
+
 
 
 //**************LOGIN/SIGNUP FUNCTIONS******************** */
@@ -469,6 +496,54 @@ app.post("/hasMyPermission",auth, async (req, res) => {
 
 //**************DOCUMENT POST FUNCTIONS******************** */
 
+// Create the BlobServiceClient object which will be used to create a container client
+var createContainerAndUpload = async (cn, filename) =>  {
+    const blobServiceClient = BlobServiceClient.fromConnectionString(
+        "DefaultEndpointsProtocol=https;AccountName=blockchainimagestore;AccountKey=qA3cp9TRxlCYqz7sTQPN0c/cKaDukEGepGRbjNOEPBWZHtVSalBaOpYIgaNQlrAMUrG8jRJwJYIDshYCN7GZGA==;EndpointSuffix=core.windows.net"
+    );
+    // console.log(blobServiceClient.generateAccountSasUrl())
+    
+    // Create a unique name for the container
+    const containerName = cn;
+    
+    console.log("\nCreating container...");
+    console.log("\t", containerName);
+    
+    // Get a reference to a container
+    const containerClient = blobServiceClient.getContainerClient(containerName);
+    // Create the container
+    // if(containerClient)
+    // {
+    //     const createContainerResponse = await containerClient.create();
+    //     console.log(
+    //         "Container was created successfully. requestId: ",
+    //         createContainerResponse.requestId
+    //     );
+    // }
+    containerClient.createIfNotExists();
+
+
+    // Create a unique name for the blob
+    const blobName = filename;
+
+    // Get a block blob client
+    const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+
+    console.log("\nUploading to Azure storage as blob:\n\t", blobName);
+
+    // Upload data to the blob
+    var filePath = path.join(__dirname,"temp_image", filename);
+    const data = fs.readFileSync(filePath);
+    const uploadBlobResponse = await blockBlobClient.upload(data, data.length);
+    console.log(
+        "Blob was uploaded successfully. requestId: ",
+        uploadBlobResponse.requestId
+    );
+
+    fs.unlinkSync(filePath);
+
+    console.log(blockBlobClient);
+}
 
 app.post("/createVerifiedDocument",auth, async (req, res) => {
     try {
@@ -478,9 +553,25 @@ app.post("/createVerifiedDocument",auth, async (req, res) => {
                 "channelName": channelName,
                 "chaincodeName": documentChaincode,
                 "userId": req.user.userId,
-                "data":req.body.data
+                "data":req.body.data.data
             }
             let result = await createVerifiedDocument(payload);
+
+            upload(req, res, async function (err) {
+                if (err instanceof multer.MulterError) {
+                  return res.status(500).json(err);
+                  // A Multer error occurred when uploading.
+                } else if (err) {
+                  return res.status(500).json(err);
+                  // An unknown error occurred when uploading.
+                }
+                // console.log(req.files);
+                let filename = req.body.data.data.documentId;
+                createContainerAndUpload(req.user.userId, filename);
+                return res.status(200).send(req.files);
+                // Everything went fine.
+              });
+
             res.send(result);
         }
         else{
