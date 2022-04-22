@@ -54,7 +54,9 @@ app.post("/registerViceAdmin", auth, async (req, res) => {
     try {
         if(req.user.role === 'admin'){
             let {userId, password} = req.body;
-
+            req.body.organization = req.user.organization;
+            console.log(req.body.organization)
+            req.body.role = 'viceAdmin';
             const {error} = validateUser(req.body);
             if(error) return res.status(400).send(error.details[0].message);
 
@@ -62,7 +64,7 @@ app.post("/registerViceAdmin", auth, async (req, res) => {
             if(user) return res.status(400).send("User already registered");
 
             user = new User({
-                userId, password, organization, role:"viceAdmin"
+                userId, password, organization: req.user.organization, role:"viceAdmin"
             });
             const salt = await bcrypt.genSalt(10);
             user.password = await bcrypt.hash(user.password,salt);
