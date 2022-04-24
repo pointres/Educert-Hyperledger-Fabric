@@ -77,6 +77,7 @@ class DocumentContract extends Contract {
     async createVerifiedDocument(ctx, documentId, applicantId, applicantName, applicantOrganizationNumber, organizationId, documentName, description, dateOfAccomplishment, tenure, percentage, outOfPercentage, documentUrl){
         if(await this.getUserRole(ctx) !== 'viceAdmin')
             return;
+            
         await this.createDocument(ctx, documentId, applicantId, applicantName, applicantOrganizationNumber, organizationId, documentName, description, dateOfAccomplishment, tenure, percentage, outOfPercentage, "Verified", documentUrl)
     }
 

@@ -140,6 +140,8 @@ class ApplicantContract extends Contract {
 		await ctx.stub.putState(applicantId, buffer);
     }
 
+
+
     async updateMyPassword(ctx, password) {
         let applicantId = await this.getUserIdentity(ctx)
 
@@ -288,13 +290,25 @@ class ApplicantContract extends Contract {
         return this.fetchLimitedFields(asset);
     }
 
-    async getAllApplicantsOfOrganization(ctx){
-        //todo
-        let role = await this.getUserRole(ctx);
-        if(role !== 'viceAdmin'){
-            return;
+    async getAllApplicantsOfOrganization(ctx) {
+        let resultsIterator = await ctx.stub.getStateByRange('', '');
+        let asset = await this.getAllPatientResults(resultsIterator, false);
+
+        let organizationId = await this.getOrganization(ctx) ;
+        const permissionedAssets = [];
+        for (let i = 0; i < asset.length; i++) {
+            const obj = asset[i];
+            if ('permissionGranted' in obj.Record && obj.Record.permissionGranted.includes(organizationId)) {
+                permissionedAssets.push(asset[i]);
+            }
         }
+
+        return permissionedAssets;
     }
+
+
+
+   
 
     async getPermissionedApplicantHistory(ctx, applicantId){
         let role = await this.getUserRole(ctx);

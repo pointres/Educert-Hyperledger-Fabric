@@ -7,7 +7,7 @@ const jwt = require('jsonwebtoken');
 const bodyparser = require("body-parser");
 const { registerAdmin, registerUser, userExist } = require("./registerUser");
 const { createApplicant, verifyDocument,changeCurrentOrganization, grantAccessToOrganization, revokeAccessFromOrganization, createVerifiedDocument, createSelfUploadedDocument, updateApplicantPersonalDetails, updateMyPassword } =require('./tx')
-const { getMyDetails, getDocumentsSignedByOrganization, getPermissionedApplicant, getPermissionedApplicantHistory, getCurrentApplicantsEnrolled, getDocumentsByApplicantId, getMyDocuments , hasMyPermission} =require('./query')
+const { getMyDetails, getDocumentsSignedByOrganization, getPermissionedApplicant, getPermissionedApplicantHistory, getCurrentApplicantsEnrolled, getDocumentsByApplicantId, getMyDocuments , hasMyPermission , getAllApplicantsOfOrganization} =require('./query')
 const {User, validateUser} = require('./models/user')
 const config_1 = require("config")
 
@@ -291,6 +291,29 @@ app.post("/getCurrentApplicantsEnrolled",auth, async (req, res) => {
         res.status(500).send(error);
     }
 });
+
+
+app.post("/getAllApplicantsOfOrganization",auth, async (req, res) => {
+    try {
+        if(req.user.role === 'viceAdmin'){
+            let payload = {
+                "organization": req.user.organization,
+                "channelName": channelName,
+                "chaincodeName": applicantChaincode,
+                "userId": req.user.userId,
+            }
+            let result = await getAllApplicantsOfOrganization(payload);
+            res.send(result);
+        }
+        else{
+            res.status(402).send("Unauthorized operation");
+        }
+    } catch (error) {
+        res.status(500).send(error);
+    }
+});
+
+
 
 //**************GET DOCUMENT FUNCTIONS******************** */
 

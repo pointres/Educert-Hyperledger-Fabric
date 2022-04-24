@@ -99,6 +99,27 @@ exports.getCurrentApplicantsEnrolled = async (request) => {
     return result;
 }
 
+exports.getAllApplicantsOfOrganization = async (request) => {
+    let organization = request.organization;
+    let num = Number(organization.match(/\d/g).join(""));
+    const ccp = getCCP(num);
+
+    const wallet = await buildWallet(Wallets, walletPath);
+
+    const gateway = new Gateway();
+    await gateway.connect(ccp, {
+        wallet,
+        identity: request.userId,
+        discovery: { enabled: true, asLocalhost: true } 
+    });
+
+    const network = await gateway.getNetwork(request.channelName);
+    const contract = network.getContract(request.chaincodeName);
+    let result = await contract.submitTransaction('getAllApplicantsOfOrganization'); 
+    return result;
+}
+
+
 exports.hasMyPermission = async (request) => {
     let organization = request.organization;
     let num = Number(organization.match(/\d/g).join(""));
