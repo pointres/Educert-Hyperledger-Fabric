@@ -33,8 +33,8 @@ exports.createApplicant = async (request) => {
     // Get the contract from the network.
     const contract = network.getContract(request.chaincodeName);
     let data=request.body;
-   
-    let result = await contract.submitTransaction('createApplicant',data.userId, data.email, data.password, data.name, data.address, data.pin, data.state, data.country, data.contact, data.dateOfBirth);
+    console.log(data)
+    let result = await contract.submitTransaction('createApplicant',data.applicantId, data.email, data.password, data.fullName, data.address, data.pincode, data.stateOfApplicant, data.country, data.contactNumber, data.dob);
     
     return result;
 }

@@ -115,19 +115,19 @@ app.post("/registerApplicant", auth, async (req, res) => {
     try {
         
         if(req.user.role === "viceAdmin"){
-            let applicantId = req.body.userId;
+            let applicantId = req.body.applicantId;
             let password = req.body.password = "Secure@2022";
-            let organization = req.body.organization;
+            let organization = req.user.organization;
             let role = req.body.role = "applicant";
             //generate certif
-            
+            console.log(req.body)
             let result = await registerUser({ OrgMSP: organization, userId: applicantId, role});
             
             //register applicant in mongo
             const {error} = validateUser({userId:applicantId, password, organization, role});
             if(error) return res.status(400).send(error.details[0].message);
 
-            let user = await User.findOne({ userId : applicantId,organization: organization, role: role });
+            let user = await User.findOne({ userId : applicantId, organization: organization, role: role });
             if(user) return res.status(400).send("User already registered");
             
             user = new User({
@@ -384,8 +384,12 @@ app.post("/updateApplicantPersonalDetails", auth, async (req, res) => {
 app.post("/updateMyPassword", auth, async (req, res) => {
     try{
         if(req.user.role === 'applicant'){
+            let user = await User.findOne({ userId : req.user.userId, role: req.user.role });
+            const validPassword = await bcrypt.compare(req.body.data.oldPassword, user.password );
+            if(!validPassword) return res.status(400).send("Incorrect Old Password");
+
             const salt = await bcrypt.genSalt(10);
-            let newPassword = await bcrypt.hash(req.body.data.password, salt);
+            let newPassword = await bcrypt.hash(req.body.data.newPassword, salt);
             req.body.data.password = newPassword;
             await User.updateOne({"userId" : req.user.userId},{$set:{password:newPassword}});
 
@@ -484,6 +488,7 @@ app.post("/hasMyPermission",auth, async (req, res) => {
                 "data": req.body.data,
             }
             let result = await hasMyPermission(payload);
+            console.log(result);
             res.send(result);
         }
         else{
