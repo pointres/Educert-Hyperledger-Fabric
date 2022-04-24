@@ -74,10 +74,11 @@ class DocumentContract extends Contract {
         await ctx.stub.putState(newDocument.documentId, buffer);
     }
 
-    async createVerifiedDocument(ctx, documentId, applicantId, applicantName, applicantOrganizationNumber, organizationId, documentName, description, dateOfAccomplishment, tenure, percentage, outOfPercentage, documentUrl){
+    async createVerifiedDocument(ctx, documentId, applicantId, applicantName, applicantOrganizationNumber, documentName, description, dateOfAccomplishment, tenure, percentage, outOfPercentage, documentUrl){
         if(await this.getUserRole(ctx) !== 'viceAdmin')
             return;
             
+        const organizationId = await this.getOrganization(ctx);
         await this.createDocument(ctx, documentId, applicantId, applicantName, applicantOrganizationNumber, organizationId, documentName, description, dateOfAccomplishment, tenure, percentage, outOfPercentage, "Verified", documentUrl)
     }
 

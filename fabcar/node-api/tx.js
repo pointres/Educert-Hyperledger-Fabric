@@ -238,7 +238,7 @@ exports.createVerifiedDocument = async (request) => {
     // Get the contract from the network.
         let contract = network.getContract('document-asset-transfer');
         
-        let result = await contract.submitTransaction('createVerifiedDocument', data.documentId, data.applicantId, data.applicantName, data.applicantOrganizationNumber, data.organizationId, data.documentName, data.description, data.dateOfAccomplishment, data.tenure, data.percentage, data.outOfPercentage, data.documentUrl);
+        let result = await contract.submitTransaction('createVerifiedDocument', data.documentId, data.applicantId, data.applicantName, data.applicantOrganizationNumber, data.documentName, data.description, data.dateOfAccomplishment, data.tenure, data.percentage, data.outOfPercentage, "url");
         
         contract = network.getContract("applicant-asset-transfer");
         await contract.submitTransaction('addDocumentIdToArray', data.applicantId, data.documentId)
@@ -272,10 +272,10 @@ exports.createSelfUploadedDocument = async (request) => {
 
     // Get the contract from the network.
     let contract = network.getContract('document-asset-transfer');
-    let result = await contract.submitTransaction('createSelfUploadedDocument', data.documentId, data.applicantId, data.applicantName, data.applicantOrganizationNumber, data.organizationId, data.documentName, data.description, data.dateOfAccomplishment, data.tenure, data.percentage, data.outOfPercentage, data.documentUrl);
+    let result = await contract.submitTransaction('createSelfUploadedDocument', data.documentId, request.userId, data.applicantName, data.applicantOrganizationNumber, data.organizationId, data.documentName, data.description, data.dateOfAccomplishment, data.tenure, data.percentage, data.outOfPercentage, "url");
 
     contract = network.getContract("applicant-asset-transfer");
-    await contract.submitTransaction('addDocumentIdToArray', data.applicantId, data.documentId)
+    await contract.submitTransaction('addDocumentIdToArray', request.userId, data.documentId)
 
     return result;
 }
