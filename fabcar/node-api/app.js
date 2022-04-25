@@ -11,13 +11,23 @@ const { getMyDetails, getDocumentsSignedByOrganization, getPermissionedApplicant
 const {User, validateUser} = require('./models/user')
 const config_1 = require("config")
 
+const uuid = require('uuid');
+
 var multer = require("multer");
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
+      console.log("me here");
+      console.log(req.body);
+
     cb(null, "temp_image");
   },
   filename: function (req, file, cb) {
-    cb(null, req.body.data.data.documentId);
+      console.log("grgrg");
+      console.log(req.body);
+      let uuid1 = uuid.v4();
+      req.uuid = uuid1;
+      //let tempJSON = JSON.parse(req.body.data);
+    cb(null, uuid1);
   },
 });
 
@@ -239,6 +249,7 @@ app.post("/getPermissionedApplicant",auth, async (req, res) => {
                 "userId": req.user.userId,
                 "data": req.body.data,
             }
+            console.log(payload)
             let result = await getPermissionedApplicant(payload);
             res.send(result);
         }
@@ -246,7 +257,7 @@ app.post("/getPermissionedApplicant",auth, async (req, res) => {
             res.status(402).send("Unauthorized operation");
         }
     } catch (error) {
-        res.status(402).send("Unauthorized operation");
+        res.status(402).send("Error in operation");
     }
 });
 
@@ -328,6 +339,7 @@ app.post("/getDocumentsByApplicantId",auth, async (req, res) => {
                 "userId": req.user.userId,
                 "data":req.body.data
             }
+            console.log(payload)
             let result = await getDocumentsByApplicantId(payload);
             res.send(result);
         }
@@ -525,7 +537,7 @@ app.post("/hasMyPermission",auth, async (req, res) => {
 //**************DOCUMENT POST FUNCTIONS******************** */
 
 // Create the BlobServiceClient object which will be used to create a container client
-var createContainerAndUpload = async (cn, filename) =>  {
+var createContainerAndUpload = async (cn, filename, documentId) =>  {
     const blobServiceClient = BlobServiceClient.fromConnectionString(
         "DefaultEndpointsProtocol=https;AccountName=blockchainimagestore;AccountKey=qA3cp9TRxlCYqz7sTQPN0c/cKaDukEGepGRbjNOEPBWZHtVSalBaOpYIgaNQlrAMUrG8jRJwJYIDshYCN7GZGA==;EndpointSuffix=core.windows.net"
     );
@@ -548,11 +560,11 @@ var createContainerAndUpload = async (cn, filename) =>  {
     //         createContainerResponse.requestId
     //     );
     // }
-    containerClient.createIfNotExists();
+    await containerClient.createIfNotExists();
 
 
     // Create a unique name for the blob
-    const blobName = filename;
+    const blobName = documentId;
 
     // Get a block blob client
     const blockBlobClient = containerClient.getBlockBlobClient(blobName);
@@ -574,18 +586,15 @@ var createContainerAndUpload = async (cn, filename) =>  {
 }
 
 app.post("/createVerifiedDocument",auth, async (req, res) => {
+    console.log("req");
+    console.log(req);
+
     try {
         if(req.user.role === 'viceAdmin'){
-            let payload = {
-                "organization": req.user.organization,
-                "channelName": channelName,
-                "chaincodeName": documentChaincode,
-                "userId": req.user.userId,
-                "data":req.body.data.data
-            }
-            let result = await createVerifiedDocument(payload);
 
             upload(req, res, async function (err) {
+
+
                 if (err instanceof multer.MulterError) {
                   return res.status(500).json(err);
                   // A Multer error occurred when uploading.
@@ -593,19 +602,33 @@ app.post("/createVerifiedDocument",auth, async (req, res) => {
                   return res.status(500).json(err);
                   // An unknown error occurred when uploading.
                 }
+                console.log("body");
+
+                console.log(req.body);
+                    let temp = JSON.parse(req.body.data);
+                    let payload = {
+                        "organization": req.user.organization,
+                        "channelName": channelName,
+                        "chaincodeName": documentChaincode,
+                        "userId": req.user.userId,
+                        "data": temp
+                    }
+                    console.log(req.uuid);
+                let result = await createVerifiedDocument(payload);
                 // console.log(req.files);
-                let filename = req.body.data.data.documentId;
-                createContainerAndUpload(req.user.userId, filename);
+                //let filename = req.uuid;
+                createContainerAndUpload(temp.applicantId, req.uuid, temp.documentId);
                 return res.status(200).send(req.files);
                 // Everything went fine.
               });
 
-            res.send(result);
+            //res.send(result);
         }
         else{
             res.status(402).send("Unauthorized operation");
         }
     } catch (error) {
+        console.log(error);
         res.status(500).send(error);
     }
 });

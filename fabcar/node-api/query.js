@@ -51,7 +51,7 @@ exports.getPermissionedApplicant = async (request) => {
 
     const contract = network.getContract(request.chaincodeName);
     
-    let result = await contract.submitTransaction('getPermissionedApplicant',request.data.applicantId);
+    let result = await contract.submitTransaction('getPermissionedApplicant',request.data);
     return result;
 }
 
@@ -167,11 +167,10 @@ exports.getDocumentsByApplicantId = async (request) => {
 
     let contract = network.getContract("applicant-asset-transfer");
     
-    let hasPermission = await contract.evaluateTransaction('hasPermission', request.data.applicantId);
+    let hasPermission = await contract.evaluateTransaction('hasPermission', request.data);
     if(hasPermission){
         contract = network.getContract('document-asset-transfer');
-        console.log(request.data.applicantId)
-        let result = await contract.evaluateTransaction('getDocumentsByApplicantId', request.data.applicantId);
+        let result = await contract.evaluateTransaction('getDocumentsByApplicantId', request.data);
         
         return result;
     }

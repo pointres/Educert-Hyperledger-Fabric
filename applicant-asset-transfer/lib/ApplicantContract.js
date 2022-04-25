@@ -1,13 +1,3 @@
-/**
- * @author Varsha Kamath
- * @email varsha.kamath@stud.fra-uas.de
- * @create date 2021-01-23 21:50:38
- * @modify date 2021-01-30 19:52:41
- * @desc [Primary Smartcontract to initiate ledger with applicant details]
- */
-/*
- * SPDX-License-Identifier: Apache-2.0
- */
 'use strict';
 
 const { Contract } = require('fabric-contract-api');
@@ -47,6 +37,7 @@ class ApplicantContract extends Contract {
             contact : asset.contact,
             dateOfBirth : asset.dateOfBirth,
             documentIds : asset.documentIds,
+            currentOrganization:asset.currentOrganization,
             organizationsEnrolledIn : asset.organizationsEnrolledIn,
             permissionGranted : asset.permissionGranted,
             updatedBy : asset.updatedBy,
@@ -292,14 +283,14 @@ class ApplicantContract extends Contract {
 
     async getAllApplicantsOfOrganization(ctx) {
         let resultsIterator = await ctx.stub.getStateByRange('', '');
-        let asset = await this.getAllPatientResults(resultsIterator, false);
+        let asset = await this.getAllApplicantResults(resultsIterator, false);
 
         let organizationId = await this.getOrganization(ctx) ;
         const permissionedAssets = [];
         for (let i = 0; i < asset.length; i++) {
             const obj = asset[i];
             if ('permissionGranted' in obj.Record && obj.Record.permissionGranted.includes(organizationId)) {
-                permissionedAssets.push(asset[i]);
+                permissionedAssets.push(asset[i].Record);
             }
         }
 
