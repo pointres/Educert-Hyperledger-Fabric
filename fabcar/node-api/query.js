@@ -200,7 +200,7 @@ const getDocumentUrls = async (applicantId, documentId) => {
     const blobClient = containerClient.getBlobClient(documentId);
     const sasOptions = {
         containerName: containerClient.containerName,
-        blobName: filename
+        blobName: documentId
     };
         sasOptions.startsOn = new Date();
         sasOptions.expiresOn = new Date(new Date().valueOf() + 3600 * 1000);
