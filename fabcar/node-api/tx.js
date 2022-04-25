@@ -306,3 +306,42 @@ exports.verifyDocument = async (request) => {
     
     return result;
 }
+
+const getDocumentUrls = async (applicantId, documentId) => {
+    let filename = applicantId;
+    let blobServiceClient = BlobServiceClient.fromConnectionString(
+        "DefaultEndpointsProtocol=https;AccountName=blockchainimagestore;AccountKey=qA3cp9TRxlCYqz7sTQPN0c/cKaDukEGepGRbjNOEPBWZHtVSalBaOpYIgaNQlrAMUrG8jRJwJYIDshYCN7GZGA==;EndpointSuffix=core.windows.net"
+    );
+    // console.log(blobServiceClient.generateAccountSasUrl());
+    // const account = "blockchainimagestore";
+    // const sas = blobServiceClient.generateAccountSasUrl();
+
+    // StorageSharedKeyCredentialPolicy s = new StorageSharedKeyCredentialPolicy();
+
+
+    // blobServiceClient = new BlobServiceClient(`https://${account}.blob.core.windows.net${sas}`);
+    const containerClient = blobServiceClient.getContainerClient(applicantId);
+    const blobClient = containerClient.getBlobClient(documentId);
+    const sasOptions = {
+        containerName: containerClient.containerName,
+        blobName: documentId
+    };
+        sasOptions.startsOn = new Date();
+        sasOptions.expiresOn = new Date(new Date().valueOf() + 3600 * 1000);
+        sasOptions.permissions = BlobSASPermissions.parse("r");
+
+    //     sasOptions.identifier = storedPolicyName;
+    // }
+
+    let documentUrl = blobClient.generateSasUrl(sasOptions);
+    // blobClient.generateSasUrl();
+    
+    return documentUrl;
+}
+
+const putUrl = async (docArray) => {
+    for(let i = 0; i < docArray.length; i++){
+        docArray[i].documentUrl = await getDocumentUrls(docArray[i].applicantId, docArray[i].documentId);
+    }
+    return docArray;
+}
