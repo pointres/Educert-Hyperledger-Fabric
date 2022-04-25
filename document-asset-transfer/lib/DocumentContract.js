@@ -60,10 +60,10 @@ class DocumentContract extends Contract {
         return (!!buffer && buffer.length > 0);
     }
 
-    async createDocument(ctx, documentId, applicantId, applicantName, applicantOrganizationNumber, organizationId, documentName, description, dateOfAccomplishment, tenure, percentage, outOfPercentage, status, documentUrl){
+    async createDocument(ctx, documentId, documentHash, applicantId, applicantName, applicantOrganizationNumber, organizationId, documentName, description, dateOfAccomplishment, tenure, percentage, outOfPercentage, status, documentUrl){
         
         let userId = await this.getUserIdentity(ctx);
-        let newDocument = new Document(documentId, "documentHash", applicantId, applicantName, applicantOrganizationNumber, organizationId, documentName, description, dateOfAccomplishment, tenure, percentage, outOfPercentage, status, documentUrl, userId);
+        let newDocument = new Document(documentId, documentHash, applicantId, applicantName, applicantOrganizationNumber, organizationId, documentName, description, dateOfAccomplishment, tenure, percentage, outOfPercentage, status, documentUrl, userId);
         const exists = await this.documentExists(ctx, newDocument.documentId);
 
         if (exists) {
@@ -74,18 +74,18 @@ class DocumentContract extends Contract {
         await ctx.stub.putState(newDocument.documentId, buffer);
     }
 
-    async createVerifiedDocument(ctx, documentId, applicantId, applicantName, applicantOrganizationNumber, documentName, description, dateOfAccomplishment, tenure, percentage, outOfPercentage, documentUrl){
+    async createVerifiedDocument(ctx, documentId, documentHash, applicantId, applicantName, applicantOrganizationNumber, documentName, description, dateOfAccomplishment, tenure, percentage, outOfPercentage, documentUrl){
         if(await this.getUserRole(ctx) !== 'viceAdmin')
             return;
             
         const organizationId = await this.getOrganization(ctx);
-        await this.createDocument(ctx, documentId, applicantId, applicantName, applicantOrganizationNumber, organizationId, documentName, description, dateOfAccomplishment, tenure, percentage, outOfPercentage, "Verified", documentUrl)
+        await this.createDocument(ctx, documentId, documentHash, applicantId, applicantName, applicantOrganizationNumber, organizationId, documentName, description, dateOfAccomplishment, tenure, percentage, outOfPercentage, "Verified", documentUrl)
     }
 
-    async createSelfUploadedDocument(ctx, documentId, applicantId, applicantName, applicantOrganizationNumber, organizationId, documentName, description, dateOfAccomplishment, tenure, percentage, outOfPercentage, documentUrl){
+    async createSelfUploadedDocument(ctx, documentId, documentHash, applicantId, applicantName, applicantOrganizationNumber, organizationId, documentName, description, dateOfAccomplishment, tenure, percentage, outOfPercentage, documentUrl){
         if(await this.getUserRole(ctx) !== 'applicant')
             return;
-        await this.createDocument(ctx, documentId, applicantId, applicantName, applicantOrganizationNumber, organizationId, documentName, description, dateOfAccomplishment, tenure, percentage, outOfPercentage, "Self-Uploaded", documentUrl)
+        await this.createDocument(ctx, documentId, documentHash, applicantId, applicantName, applicantOrganizationNumber, organizationId, documentName, description, dateOfAccomplishment, tenure, percentage, outOfPercentage, "Self-Uploaded", documentUrl)
     }
 
 
@@ -141,7 +141,6 @@ class DocumentContract extends Contract {
         queryString.selector.applicantId = await this.getUserIdentity(ctx);
         const buffer = await this.getQueryResultForQueryString(ctx, JSON.stringify(queryString));
         let asset = JSON.parse(buffer.toString());
-
         return this.fetchLimitedFields(asset);
     }
 

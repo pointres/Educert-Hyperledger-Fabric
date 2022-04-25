@@ -171,7 +171,7 @@ exports.getDocumentsByApplicantId = async (request) => {
     if(hasPermission){
         contract = network.getContract('document-asset-transfer');
         let result = await contract.evaluateTransaction('getDocumentsByApplicantId', request.data);
-        
+        putUrl(result);
         return result;
     }
     else{
@@ -180,6 +180,42 @@ exports.getDocumentsByApplicantId = async (request) => {
     
 }
 
+const getDocumentUrls = async (applicantId, documentId) => {
+    let filename = applicantId;
+    let blobServiceClient = BlobServiceClient.fromConnectionString(
+        "DefaultEndpointsProtocol=https;AccountName=blockchainimagestore;AccountKey=qA3cp9TRxlCYqz7sTQPN0c/cKaDukEGepGRbjNOEPBWZHtVSalBaOpYIgaNQlrAMUrG8jRJwJYIDshYCN7GZGA==;EndpointSuffix=core.windows.net"
+    );
+    // console.log(blobServiceClient.generateAccountSasUrl());
+    // const account = "blockchainimagestore";
+    // const sas = blobServiceClient.generateAccountSasUrl();
+
+    // StorageSharedKeyCredentialPolicy s = new StorageSharedKeyCredentialPolicy();
+
+
+    // blobServiceClient = new BlobServiceClient(`https://${account}.blob.core.windows.net${sas}`);
+    const containerClient = blobServiceClient.getContainerClient(documentId);
+    const blobClient = containerClient.getBlobClient(filename);
+    const sasOptions = {
+        containerName: containerClient.containerName,
+        blobName: filename
+    };
+        sasOptions.startsOn = new Date();
+        sasOptions.expiresOn = new Date(new Date().valueOf() + 3600 * 1000);
+        sasOptions.permissions = BlobSASPermissions.parse("r");
+
+    //     sasOptions.identifier = storedPolicyName;
+    // }
+
+    console.log(blobClient.generateSasUrl(sasOptions));
+    // blobClient.generateSasUrl();
+    return blobClient.url;
+}
+
+const putUrl = async (docArray) => {
+    for(let i = 0; i < docArray.length; i++){
+        docArray[i].documentUrl = await getDocumentUrls(docArray[i].applicantId, docArray[i].documentId);
+    }
+}
 
 exports.getMyDocuments = async (request) => {
     let organization = request.organization;
@@ -198,6 +234,7 @@ exports.getMyDocuments = async (request) => {
     const network = await gateway.getNetwork(request.channelName);
     const contract = network.getContract(request.chaincodeName);
     let result = await contract.evaluateTransaction('getMyDocuments');
+    putUrl(request);
     return result;    
 }
 
@@ -218,5 +255,8 @@ exports.getDocumentsSignedByOrganization = async (request) => {
     const network = await gateway.getNetwork(request.channelName);
     const contract = network.getContract(request.chaincodeName);
     let result = await contract.evaluateTransaction("getDocumentsSignedByOrganization");
+
+    putUrl(result);
+
     return JSON.parse(result);
 }

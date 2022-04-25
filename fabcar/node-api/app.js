@@ -10,6 +10,7 @@ const { createApplicant, verifyDocument,changeCurrentOrganization, grantAccessTo
 const { getMyDetails, getDocumentsSignedByOrganization, getPermissionedApplicant, getPermissionedApplicantHistory, getCurrentApplicantsEnrolled, getDocumentsByApplicantId, getMyDocuments , hasMyPermission , getAllApplicantsOfOrganization} =require('./query')
 const {User, validateUser} = require('./models/user')
 const config_1 = require("config")
+const { imageHash }= require('image-hash');
 
 const uuid = require('uuid');
 
@@ -361,6 +362,9 @@ app.post("/getMyDocuments",auth, async (req, res) => {
                 "userId": req.user.userId
             }
             let result = await getMyDocuments(payload);
+
+            
+
             res.send(result);
         }
         else{
@@ -604,24 +608,36 @@ app.post("/createVerifiedDocument",auth, async (req, res) => {
                 }
                 console.log("body");
 
-                console.log(req.body);
-                    let temp = JSON.parse(req.body.data);
-                    let payload = {
-                        "organization": req.user.organization,
-                        "channelName": channelName,
-                        "chaincodeName": documentChaincode,
-                        "userId": req.user.userId,
-                        "data": temp
-                    }
-                    console.log(req.uuid);
+                // console.log(req.body);
+                let filename = req.uuid;
+                const fBuffer = fs.readFileSync(path.join(__dirname,"temp_image", filename));
+                let documentHash;
+
+                imageHash({data: fBuffer}, 16, true, (error, data) => {
+                        if(error) throw error;
+                        documentHash = data;
+                    });
+                
+                console.log(documentHash);
+                let details = JSON.parse(req.body.data);
+                let payload = {
+                    "organization": req.user.organization,
+                    "channelName": channelName,
+                    "chaincodeName": documentChaincode,
+                    "userId": req.user.userId,
+                    "data": details,
+                    "documentHash":documentHash
+                }
+                console.log(req.uuid);
                 let result = await createVerifiedDocument(payload);
                 // console.log(req.files);
-                //let filename = req.uuid;
-                createContainerAndUpload(temp.applicantId, req.uuid, temp.documentId);
-                return res.status(200).send(req.files);
+                res.send(result);
+
+                createContainerAndUpload(temp.applicantId, filename, temp.documentId);
+                res.status(200).send(req.files);
+                res.send(result);
                 // Everything went fine.
               });
-
             //res.send(result);
         }
         else{
@@ -636,15 +652,49 @@ app.post("/createVerifiedDocument",auth, async (req, res) => {
 app.post("/createSelfUploadedDocument",auth, async (req, res) => {
     try {
         if(req.user.role === 'applicant'){
-            let payload = {
-                "organization": req.user.organization,
-                "channelName": channelName,
-                "chaincodeName": documentChaincode,
-                "userId": req.user.userId,
-                "data":req.body.data
-            }
-            let result = await createSelfUploadedDocument(payload);
-            res.send(result);
+
+
+            upload(req, res, async function (err) {
+                if (err instanceof multer.MulterError) {
+                  return res.status(500).json(err);
+                  // A Multer error occurred when uploading.
+                } else if (err) {
+                  return res.status(500).json(err);
+                  // An unknown error occurred when uploading.
+                }
+
+                // console.log(req.body);
+                let filename = req.uuid;
+                const fBuffer = fs.readFileSync(path.join(__dirname,"temp_image", filename));
+                let documentHash;
+
+                imageHash({data: fBuffer}, 16, true, (error, data) => {
+                        if(error) throw error;
+                        documentHash = data;
+                    });
+                
+                console.log(documentHash);
+                let details = JSON.parse(req.body.data);
+                let payload = {
+                    "organization": req.user.organization,
+                    "channelName": channelName,
+                    "chaincodeName": documentChaincode,
+                    "userId": req.user.userId,
+                    "data":req.body.data,
+                    "documentHash":documentHash
+                }
+                console.log(req.uuid);
+                let result = await createSelfUploadedDocument(payload);
+
+                // console.log(req.files);
+                res.send(result);
+
+                createContainerAndUpload(temp.applicantId, filename, temp.documentId);
+                res.status(200).send(req.files);
+                res.send(result);
+                // Everything went fine.
+              });
+            //res.send(result);
         }
         else{
             res.status(402).send("Unauthorized operation");
