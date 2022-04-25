@@ -4,6 +4,9 @@ const path = require("path");
 const walletPath = path.join(__dirname, "wallet");
 const { buildWallet } = require('./AppUtils')
 
+const { BlobServiceClient, BlobSASPermissions } = require('@azure/storage-blob');
+
+
 
 //**************GET FUNCTIONS***************** */
 
