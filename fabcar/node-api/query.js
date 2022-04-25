@@ -196,8 +196,8 @@ const getDocumentUrls = async (applicantId, documentId) => {
 
 
     // blobServiceClient = new BlobServiceClient(`https://${account}.blob.core.windows.net${sas}`);
-    const containerClient = blobServiceClient.getContainerClient(documentId);
-    const blobClient = containerClient.getBlobClient(filename);
+    const containerClient = blobServiceClient.getContainerClient(applicantId);
+    const blobClient = containerClient.getBlobClient(documentId);
     const sasOptions = {
         containerName: containerClient.containerName,
         blobName: filename
@@ -209,15 +209,17 @@ const getDocumentUrls = async (applicantId, documentId) => {
     //     sasOptions.identifier = storedPolicyName;
     // }
 
-    console.log(blobClient.generateSasUrl(sasOptions));
+    let documentUrl = blobClient.generateSasUrl(sasOptions);
     // blobClient.generateSasUrl();
-    return blobClient.url;
+    
+    return documentUrl;
 }
 
 const putUrl = async (docArray) => {
     for(let i = 0; i < docArray.length; i++){
         docArray[i].documentUrl = await getDocumentUrls(docArray[i].applicantId, docArray[i].documentId);
     }
+    return docArray;
 }
 
 exports.getMyDocuments = async (request) => {
@@ -259,7 +261,8 @@ exports.getDocumentsSignedByOrganization = async (request) => {
     const contract = network.getContract(request.chaincodeName);
     let result = await contract.evaluateTransaction("getDocumentsSignedByOrganization");
 
-    putUrl(result);
+    result = putUrl(JSON.parse(result));
+    console.log(result);
 
-    return JSON.parse(result);
+    return result;
 }

@@ -10,7 +10,8 @@ const { createApplicant, verifyDocument,changeCurrentOrganization, grantAccessTo
 const { getMyDetails, getDocumentsSignedByOrganization, getPermissionedApplicant, getPermissionedApplicantHistory, getCurrentApplicantsEnrolled, getDocumentsByApplicantId, getMyDocuments , hasMyPermission , getAllApplicantsOfOrganization} =require('./query')
 const {User, validateUser} = require('./models/user')
 const config_1 = require("config")
-const { imageHash }= require('image-hash');
+// const { imageHash }= require('image-hash');
+const imageHash = require('node-image-hash');
 
 const uuid = require('uuid');
 
@@ -613,11 +614,27 @@ app.post("/createVerifiedDocument",auth, async (req, res) => {
                 const fBuffer = fs.readFileSync(path.join(__dirname,"temp_image", filename));
                 let documentHash;
 
-                imageHash({data: fBuffer}, 16, true, (error, data) => {
-                        if(error) throw error;
-                        documentHash = data;
+
+                await imageHash
+                    .hash(fBuffer, 8, 'hex')
+                    .then((hash) => {
+                    documentHash = hash.hash; // '83c3d381c38985a5'
+                    console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+                    console.log(documentHash);
+                    console.log(hash.type); // 'blockhash8'
                     });
+
+
+                // imageHash({data: fBuffer}, 16, true, (error, data) => {
+                //         if(error) throw error;
+                //         console.log(data);
+                //         console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+                //         documentHash = data;
+                //         console.log('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb')
+                //         console.log(documentHash)
+                //     });
                 
+                console.log('cccccccccccccccccccccccccccccccccccccc')
                 console.log(documentHash);
                 let details = JSON.parse(req.body.data);
                 let payload = {
@@ -631,11 +648,11 @@ app.post("/createVerifiedDocument",auth, async (req, res) => {
                 console.log(req.uuid);
                 let result = await createVerifiedDocument(payload);
                 // console.log(req.files);
-                res.send(result);
+                // res.send(result);
 
-                createContainerAndUpload(temp.applicantId, filename, temp.documentId);
-                res.status(200).send(req.files);
-                res.send(result);
+                createContainerAndUpload(details.applicantId, filename, details.documentId);
+                return res.status(200).send();
+                // res.send(result);
                 // Everything went fine.
               });
             //res.send(result);
