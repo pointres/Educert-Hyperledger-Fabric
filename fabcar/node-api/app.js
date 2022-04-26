@@ -115,7 +115,7 @@ app.post("/registerViceAdmin", auth, async (req, res) => {
             res.send(result);
         }
         else{
-            res.status(401).send("Unauthorized access")
+            res.status(403).send("Unauthorized access")
         }
     } 
     catch (error) {
@@ -133,7 +133,7 @@ app.post("/registerApplicant", auth, async (req, res) => {
             let role = req.body.role = "applicant";
             //generate certif
             console.log(req.body)
-            let result = await registerUser({ OrgMSP: organization, userId: applicantId, role});
+            await registerUser({ OrgMSP: organization, userId: applicantId, role});
             
             //register applicant in mongo
             const {error} = validateUser({userId:applicantId, password, organization, role});
@@ -156,12 +156,15 @@ app.post("/registerApplicant", auth, async (req, res) => {
             req.channelName =  channelName;
             req.chaincodeName = applicantChaincode;
             req.body.password = user.password;
-            await createApplicant(req);
-            return res.send('Applicant Created Successfully');
+            let result = await createApplicant(req);
+            if(result.ok)
+                return res.send('Applicant Created Successfully');
+            else
+                return res.send(400).send(result.error);
         }
-        else (
-        res.status(500).send("Unauthorized Access!")
-        )
+        else {
+            res.status(403).send("Unauthorized Access!");
+        }
     } 
     catch (error) {
         res.status(500).send(error)
@@ -209,7 +212,7 @@ app.post("/getViceAdmins",auth, async (req, res) => {
             res.send(result);
         }
         else{
-            res.status(402).send("Unauthorized operation");
+            res.status(403).send("Unauthorized operation");
         }
     } catch (error) {
         res.status(500).send(error);
@@ -230,10 +233,13 @@ app.post('/getMyDetails', auth, async (req, res) => {
                 "userId": req.user.userId
             }
             let result = await getMyDetails(payload);
-            res.send(result);
+            if(result.ok)
+                res.send(result.data);
+            else
+                res.status(500).send(result.error);
         }
         else{
-            res.status(402).send("Unauthorized operation");
+            res.status(403).send("Unauthorized operation");
         }
 
     } catch (error) {
@@ -253,13 +259,16 @@ app.post("/getPermissionedApplicant",auth, async (req, res) => {
             }
             console.log(payload)
             let result = await getPermissionedApplicant(payload);
-            res.send(result);
+            if(result.ok)
+                res.send(result.data);
+            else
+                res.status(500).send(result.error);
         }
         else{
-            res.status(402).send("Unauthorized operation");
+            res.status(403).send("Unauthorized operation");
         }
     } catch (error) {
-        res.status(402).send("Error in operation");
+        res.status(403).send("Error in operation");
     }
 });
 
@@ -277,7 +286,7 @@ app.post("/getPermissionedApplicantHistory",auth, async (req, res) => {
             res.send(result);
         }
         else{
-            res.status(402).send("Unauthorized operation");
+            res.status(403).send("Unauthorized operation");
         }
     } catch (error) {
         res.status(500).send(error);
@@ -295,10 +304,14 @@ app.post("/getEnrolledApplicants",auth, async (req, res) => {
                 "userId": req.user.userId,
             }
             let result = await getEnrolledApplicants(payload);
-            res.send(result);
+            if(result.ok)
+                res.send(result.data);
+            else
+                res.status(500).send(result.error);
+
         }
         else{
-            res.status(402).send("Unauthorized operation");
+            res.status(403).send("Unauthorized operation");
         }
     } catch (error) {
         res.status(500).send(error);
@@ -316,10 +329,14 @@ app.post("/getAllApplicantsOfOrganization",auth, async (req, res) => {
                 "userId": req.user.userId,
             }
             let result = await getAllApplicantsOfOrganization(payload);
-            res.send(result);
+
+             if(result.ok)
+                res.send(result.data);
+            else
+                res.status(500).send(result.error);
         }
         else{
-            res.status(402).send("Unauthorized operation");
+            res.status(403).send("Unauthorized operation");
         }
     } catch (error) {
         res.status(500).send(error);
@@ -343,10 +360,13 @@ app.post("/getDocumentsByApplicantId",auth, async (req, res) => {
             }
             console.log(payload)
             let result = await getDocumentsByApplicantId(payload);
-            res.send(result);
+            if(result.ok)
+                res.send(result.data);
+            else
+                res.status(500).send(result.error);
         }
         else{
-            res.status(402).send("Unauthorized operation");
+            res.status(403).send("Unauthorized operation");
         }
     } catch (error) {
         res.status(500).send(error);
@@ -363,13 +383,13 @@ app.post("/getMyDocuments",auth, async (req, res) => {
                 "userId": req.user.userId
             }
             let result = await getMyDocuments(payload);
-
-            
-
-            res.send(result);
+            if(result.ok)
+                res.send(result.data);
+            else
+                res.status(500).send(result.error);
         }
         else{
-            res.status(402).send("Unauthorized operation");
+            res.status(403).send("Unauthorized operation");
         }
     } catch (error) {
         res.status(500).send(error);
@@ -386,10 +406,13 @@ app.post("/getDocumentsSignedByOrganization",auth, async (req, res) => {
                 "userId": req.user.userId
             }
             let result = await getDocumentsSignedByOrganization(payload);
-            res.send(result);
+            if(result.ok)
+                res.send(result.data);
+            else
+                res.status(500).send(result.error);
         }
         else{
-            res.status(402).send("Unauthorized operation");
+            res.status(403).send("Unauthorized operation");
         }
     } catch (error) {
         res.status(500).send(error);
@@ -410,10 +433,13 @@ app.post("/updateMyPersonalDetails", auth, async (req, res) => {
                 "data": req.body.data
             }
             let result = await updateMyPersonalDetails(payload);
-            res.send(result);
+            if(result.ok)
+                res.send("Update Successful");
+            else
+                res.status(500).send(result.error);
         }
         else{
-            res.status(402).send("Unauthorized operation");
+            res.status(403).send("Unauthorized operation");
         }
     }catch (error){
         res.status(500).send(error);
@@ -441,10 +467,14 @@ app.post("/updateMyPassword", auth, async (req, res) => {
                 "data": req.body.data
             }
             let result = await updateMyPassword(payload);
-            res.send(result);
+            
+            if(result.ok)
+                res.send("Update Successful");
+            else
+                res.status(500).send(result.error);
         }
         else{
-            res.status(402).send("Unauthorized operation");
+            res.status(403).send("Unauthorized operation");
         }
     }catch (error){
         res.status(500).send(error);
@@ -463,10 +493,14 @@ app.post("/changeCurrentOrganization",auth, async (req, res) => {
                 "data": req.body.data,
             }
             let result = await changeCurrentOrganization(payload);
-            res.send(result);
+            
+            if(result.ok)
+                res.send(result.data);
+            else
+                res.status(500).send(result.error);
         }
         else{
-            res.status(402).send("Unauthorized operation");
+            res.status(403).send("Unauthorized operation");
         }
     } catch (error) {
         res.status(500).send(error);
@@ -484,10 +518,14 @@ app.post("/grantAccessToOrganization",auth, async (req, res) => {
                 "data": req.body.data,
             }
             let result = await grantAccessToOrganization(payload);
-            res.send(result);
+            
+            if(result.ok)
+                res.send("Granted access");
+            else
+                res.status(500).send(result.error);
         }
         else{
-            res.status(402).send("Unauthorized operation");
+            res.status(403).send("Unauthorized operation");
         }
     } catch (error) {
         res.status(500).send(error);
@@ -507,10 +545,13 @@ app.post("/revokeAccessFromOrganization",auth, async (req, res) => {
                 "data": req.body.data,
             }
             let result = await revokeAccessFromOrganization(payload);
-            res.send(result);
+            if(result.ok)
+                res.send("Revoked Access");
+            else
+                res.status(500).send(result.error);
         }
         else{
-            res.status(402).send("Unauthorized operation");
+            res.status(403).send("Unauthorized operation");
         }
     } catch (error) {
         res.status(500).send(error);
@@ -528,11 +569,14 @@ app.post("/hasMyPermission",auth, async (req, res) => {
                 "data": req.body.data,
             }
             let result = await hasMyPermission(payload);
-            console.log(result);
-            res.send(result);
+            
+            if(result.ok)
+                res.send(result.data);
+            else
+                res.status(500).send(result.error);
         }
         else{
-            res.status(402).send("Unauthorized operation");
+            res.status(403).send("Unauthorized operation");
         }
     } catch (error) {
         res.status(500).send(error);
@@ -619,7 +663,6 @@ app.post("/createVerifiedDocument",auth, async (req, res) => {
                     .hash(fBuffer, 8, 'hex')
                     .then((hash) => {
                     documentHash = hash.hash; // '83c3d381c38985a5'
-                    console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
                     console.log(documentHash);
                     console.log(hash.type); // 'blockhash8'
                     });
@@ -628,13 +671,9 @@ app.post("/createVerifiedDocument",auth, async (req, res) => {
                 // imageHash({data: fBuffer}, 16, true, (error, data) => {
                 //         if(error) throw error;
                 //         console.log(data);
-                //         console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
                 //         documentHash = data;
-                //         console.log('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb')
-                //         console.log(documentHash)
                 //     });
                 
-                console.log('cccccccccccccccccccccccccccccccccccccc')
                 console.log(documentHash);
                 let details = JSON.parse(req.body.data);
                 let payload = {
@@ -647,18 +686,22 @@ app.post("/createVerifiedDocument",auth, async (req, res) => {
                 }
                 console.log(req.uuid);
                 let result = await createVerifiedDocument(payload);
+                
                 // console.log(req.files);
                 // res.send(result);
-
-                createContainerAndUpload(details.applicantId, filename, details.documentId);
-                return res.status(200).send();
+                if(result.ok){
+                    createContainerAndUpload(details.applicantId, filename, details.documentId);
+                    res.send("Created document");
+                }
+                else
+                    res.status(500).send(result.error);
                 // res.send(result);
                 // Everything went fine.
               });
             //res.send(result);
         }
         else{
-            res.status(402).send("Unauthorized operation");
+            res.status(403).send("Unauthorized operation");
         }
     } catch (error) {
         console.log(error);
@@ -714,7 +757,7 @@ app.post("/createSelfUploadedDocument",auth, async (req, res) => {
             //res.send(result);
         }
         else{
-            res.status(402).send("Unauthorized operation");
+            res.status(403).send("Unauthorized operation");
         }
     } catch (error) {
         res.status(500).send(error);
@@ -732,10 +775,13 @@ app.post("/verifyDocument",auth, async (req, res) => {
                 "data": req.body.data
             }
             let result = await verifyDocument(payload);
-            res.send(result);
+            if(result.ok)
+                res.send(result.data);
+            else
+                res.status(500).send(result.error);
         }
         else{
-            res.status(402).send("Unauthorized operation");
+            res.status(403).send("Unauthorized operation");
         }
     } catch (error) {
         res.status(500).send(error);

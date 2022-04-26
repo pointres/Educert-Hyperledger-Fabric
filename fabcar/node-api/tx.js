@@ -2,7 +2,7 @@ const { getCCP } = require("./buildCCP");
 const { Wallets, Gateway } = require('fabric-network');
 const path = require("path");
 const walletPath = path.join(__dirname, "wallet");
-const {buildWallet} =require('./AppUtils')
+const { buildWallet } = require('./AppUtils')
 
 
 
@@ -12,170 +12,197 @@ const {buildWallet} =require('./AppUtils')
 //***************APPLICANT POST FUNCTIONS************* */
 
 exports.createApplicant = async (request) => {
+    try {
+        let organization = request.user.organization;
+        let num = Number(organization.match(/\d/g).join(""));
+        const ccp = getCCP(num);
 
-    let organization = request.user.organization;
-    let num = Number(organization.match(/\d/g).join(""));
-    const ccp = getCCP(num);
+        const wallet = await buildWallet(Wallets, walletPath);
 
-    const wallet = await buildWallet(Wallets, walletPath);
+        const gateway = new Gateway();
 
-    const gateway = new Gateway();
+        await gateway.connect(ccp, {
+            wallet,
+            identity: request.user.userId,
+            discovery: { enabled: true, asLocalhost: true } // using asLocalhost as this gateway is using a fabric network deployed locally
+        });
 
-    await gateway.connect(ccp, {
-        wallet,
-        identity: request.user.userId,
-        discovery: { enabled: true, asLocalhost: true } // using asLocalhost as this gateway is using a fabric network deployed locally
-    });
+        // Build a network instance based on the channel where the smart contract is deployed
+        const network = await gateway.getNetwork(request.channelName);
 
-    // Build a network instance based on the channel where the smart contract is deployed
-    const network = await gateway.getNetwork(request.channelName);
-
-    // Get the contract from the network.
-    const contract = network.getContract(request.chaincodeName);
-    let data=request.body;
-    console.log(data)
-    await contract.submitTransaction('createApplicant',data.applicantId, data.email, data.password, data.fullName, data.address, data.pincode, data.stateOfApplicant, data.country, data.contactNumber, data.dob);
+        // Get the contract from the network.
+        const contract = network.getContract(request.chaincodeName);
+        let data = request.body;
+        console.log(data)
+        await contract.submitTransaction('createApplicant', data.applicantId, data.email, data.password, data.fullName, data.address, data.pincode, data.stateOfApplicant, data.country, data.contactNumber, data.dob);
+        return { ok: true }
+    } catch (error) {
+        return { ok: false, error: "Error in contract operation: " + error.message };
+    }
 
 
 }
 
 
 exports.updateMyPersonalDetails = async (request) => {
+    try {
+        let organization = request.organization;
+        let num = Number(organization.match(/\d/g).join(""));
+        const ccp = getCCP(num);
 
-    let organization = request.organization;
-    let num = Number(organization.match(/\d/g).join(""));
-    const ccp = getCCP(num);
+        const wallet = await buildWallet(Wallets, walletPath);
 
-    const wallet = await buildWallet(Wallets, walletPath);
+        const gateway = new Gateway();
 
-    const gateway = new Gateway();
+        await gateway.connect(ccp, {
+            wallet,
+            identity: request.userId,
+            discovery: { enabled: true, asLocalhost: true } // using asLocalhost as this gateway is using a fabric network deployed locally
+        });
 
-    await gateway.connect(ccp, {
-        wallet,
-        identity: request.userId,
-        discovery: { enabled: true, asLocalhost: true } // using asLocalhost as this gateway is using a fabric network deployed locally
-    });
+        // Build a network instance based on the channel where the smart contract is deployed
+        const network = await gateway.getNetwork(request.channelName);
 
-    // Build a network instance based on the channel where the smart contract is deployed
-    const network = await gateway.getNetwork(request.channelName);
+        // Get the contract from the network.
+        const contract = network.getContract(request.chaincodeName);
+        let data = request.data;
 
-    // Get the contract from the network.
-    const contract = network.getContract(request.chaincodeName);
-    let data = request.data;
-   
-    await contract.submitTransaction('updateMyPersonalDetails', JSON.stringify(data));
+        await contract.submitTransaction('updateMyPersonalDetails', JSON.stringify(data));
+        return { ok: true }
+    } catch (error) {
+        return { ok: false, error: "Error in contract operation: " + error.message };
+    }
+
 }
 
 exports.updateMyPassword = async (request) => {
+    try {
+        let organization = request.organization;
+        let num = Number(organization.match(/\d/g).join(""));
+        const ccp = getCCP(num);
 
-    let organization = request.organization;
-    let num = Number(organization.match(/\d/g).join(""));
-    const ccp = getCCP(num);
+        const wallet = await buildWallet(Wallets, walletPath);
 
-    const wallet = await buildWallet(Wallets, walletPath);
+        const gateway = new Gateway();
 
-    const gateway = new Gateway();
+        await gateway.connect(ccp, {
+            wallet,
+            identity: request.userId,
+            discovery: { enabled: true, asLocalhost: true } // using asLocalhost as this gateway is using a fabric network deployed locally
+        });
 
-    await gateway.connect(ccp, {
-        wallet,
-        identity: request.userId,
-        discovery: { enabled: true, asLocalhost: true } // using asLocalhost as this gateway is using a fabric network deployed locally
-    });
+        // Build a network instance based on the channel where the smart contract is deployed
+        const network = await gateway.getNetwork(request.channelName);
 
-    // Build a network instance based on the channel where the smart contract is deployed
-    const network = await gateway.getNetwork(request.channelName);
+        // Get the contract from the network.
+        const contract = network.getContract(request.chaincodeName);
+        let data = request.data;
 
-    // Get the contract from the network.
-    const contract = network.getContract(request.chaincodeName);
-    let data = request.data;
-   
-    let result = await contract.submitTransaction('updateMyPassword', data.password);
-    
-    return result;
+        await contract.submitTransaction('updateMyPassword', data.password);
+
+        return { ok: true }
+
+    } catch (error) {
+        return { ok: false, error: "Error in contract operation: " + error.message };
+
+    }
+
 }
 
 
 exports.changeCurrentOrganization = async (request) => {
-    let organization = request.organization;
-    let num = Number(organization.match(/\d/g).join(""));
-    const ccp = getCCP(num);
+    try {
+        let organization = request.organization;
+        let num = Number(organization.match(/\d/g).join(""));
+        const ccp = getCCP(num);
 
-    const wallet = await buildWallet(Wallets, walletPath);
+        const wallet = await buildWallet(Wallets, walletPath);
 
-    const gateway = new Gateway();
+        const gateway = new Gateway();
 
-    await gateway.connect(ccp, {
-        wallet,
-        identity: request.userId,
-        discovery: { enabled: true, asLocalhost: true } // using asLocalhost as this gateway is using a fabric network deployed locally
-    });
+        await gateway.connect(ccp, {
+            wallet,
+            identity: request.userId,
+            discovery: { enabled: true, asLocalhost: true } // using asLocalhost as this gateway is using a fabric network deployed locally
+        });
 
-    // Build a network instance based on the channel where the smart contract is deployed
-    const network = await gateway.getNetwork(request.channelName);
+        // Build a network instance based on the channel where the smart contract is deployed
+        const network = await gateway.getNetwork(request.channelName);
 
-    // Get the contract from the network.
-    const contract = network.getContract(request.chaincodeName);
-    
-    let result = await contract.submitTransaction('changeCurrentOrganization', request.data.applicantId);
-    
-    return result;
+        // Get the contract from the network.
+        const contract = network.getContract(request.chaincodeName);
+
+        let result = await contract.submitTransaction('changeCurrentOrganization', request.data.applicantId);
+        return { ok: true, data: result };
+
+    } catch (error) {
+        return { ok: false, error: "Error in contract operation: " + error.message };
+    }
+
 }
 
-
-
 exports.grantAccessToOrganization = async (request) => {
-    let organization = request.organization;
-    let num = Number(organization.match(/\d/g).join(""));
-    const ccp = getCCP(num);
+    try {
+        let organization = request.organization;
+        let num = Number(organization.match(/\d/g).join(""));
+        const ccp = getCCP(num);
 
-    const wallet = await buildWallet(Wallets, walletPath);
+        const wallet = await buildWallet(Wallets, walletPath);
 
-    const gateway = new Gateway();
+        const gateway = new Gateway();
 
-    await gateway.connect(ccp, {
-        wallet,
-        identity: request.userId,
-        discovery: { enabled: true, asLocalhost: true } // using asLocalhost as this gateway is using a fabric network deployed locally
-    });
+        await gateway.connect(ccp, {
+            wallet,
+            identity: request.userId,
+            discovery: { enabled: true, asLocalhost: true } // using asLocalhost as this gateway is using a fabric network deployed locally
+        });
 
-    // Build a network instance based on the channel where the smart contract is deployed
-    const network = await gateway.getNetwork(request.channelName);
-    const channel = await network.getChannel();
-    const mspids = await channel.getMspids();
-    // Get the contract from the network.
-    const contract = network.getContract(request.chaincodeName);
-    
-    let result = await contract.submitTransaction('grantAccessToOrganization',request.data.organizationId);
-    result.mspids = mspids;
-    console.log(result)   
-    return result;
+        // Build a network instance based on the channel where the smart contract is deployed
+        const network = await gateway.getNetwork(request.channelName);
+        const channel = await network.getChannel();
+        const mspids = await channel.getMspids();
+        // Get the contract from the network.
+        const contract = network.getContract(request.chaincodeName);
+
+        await contract.submitTransaction('grantAccessToOrganization', request.data.organizationId);
+        //result.mspids = mspids;
+        return { ok: true };
+    } catch (error) {
+        return { ok: false, error: "Error in contract operation: " + error.message };
+    }
+
 }
 
 
 exports.revokeAccessFromOrganization = async (request) => {
-    let organization = request.organization;
-    let num = Number(organization.match(/\d/g).join(""));
-    const ccp = getCCP(num);
+    try {
+        let organization = request.organization;
+        let num = Number(organization.match(/\d/g).join(""));
+        const ccp = getCCP(num);
 
-    const wallet = await buildWallet(Wallets, walletPath);
+        const wallet = await buildWallet(Wallets, walletPath);
 
-    const gateway = new Gateway();
+        const gateway = new Gateway();
 
-    await gateway.connect(ccp, {
-        wallet,
-        identity: request.userId,
-        discovery: { enabled: true, asLocalhost: true } // using asLocalhost as this gateway is using a fabric network deployed locally
-    });
+        await gateway.connect(ccp, {
+            wallet,
+            identity: request.userId,
+            discovery: { enabled: true, asLocalhost: true } // using asLocalhost as this gateway is using a fabric network deployed locally
+        });
 
-    // Build a network instance based on the channel where the smart contract is deployed
-    const network = await gateway.getNetwork(request.channelName);
+        // Build a network instance based on the channel where the smart contract is deployed
+        const network = await gateway.getNetwork(request.channelName);
 
-    // Get the contract from the network.
-    const contract = network.getContract(request.chaincodeName);
-    
-    let result = await contract.submitTransaction('revokeAccessFromOrganization',request.data.organizationId);
-    
-    return result;
+        // Get the contract from the network.
+        const contract = network.getContract(request.chaincodeName);
+
+        await contract.submitTransaction('revokeAccessFromOrganization', request.data.organizationId);
+
+        return { ok: true };
+    } catch (error) {
+        return { ok: false, error: "Error in contract operation: " + error.message };
+    }
+
 }
 
 
@@ -199,7 +226,7 @@ exports.revokeAccessFromOrganization = async (request) => {
 
 //     // Get the contract from the network.
 //     const contract = network.getContract(request.chaincodeName);
-    
+
 //     let result = await contract.submitTransaction('getAllApplicantsOfOrganization');
 //     
 //     return result;
@@ -210,97 +237,111 @@ exports.revokeAccessFromOrganization = async (request) => {
 //**************DOCUMENT POST FUNCTIONS******************** */
 
 exports.createVerifiedDocument = async (request) => {
-    let organization = request.organization;
-    let num = Number(organization.match(/\d/g).join(""));
-    
-    const ccp = getCCP(num);
+    try {
+        let organization = request.organization;
+        let num = Number(organization.match(/\d/g).join(""));
 
-    const wallet = await buildWallet(Wallets, walletPath);
+        const ccp = getCCP(num);
 
-    const gateway = new Gateway();
+        const wallet = await buildWallet(Wallets, walletPath);
 
-    await gateway.connect(ccp, {
-        wallet,
-        identity: request.userId,
-        discovery: { enabled: true, asLocalhost: true } // using asLocalhost as this gateway is using a fabric network deployed locally
-    });
+        const gateway = new Gateway();
 
-    // Build a network instance based on the channel where the smart contract is deployed
-    const network = await gateway.getNetwork(request.channelName);
-   
-    let contract = network.getContract("applicant-asset-transfer");
-    let data = request.data;
-    let hasPermission = await contract.evaluateTransaction('hasPermission', data.applicantId);
+        await gateway.connect(ccp, {
+            wallet,
+            identity: request.userId,
+            discovery: { enabled: true, asLocalhost: true } // using asLocalhost as this gateway is using a fabric network deployed locally
+        });
 
-    if(hasPermission){
-    // Get the contract from the network.
-        let contract = network.getContract('document-asset-transfer');
-        
-        let result = await contract.submitTransaction('createVerifiedDocument', data.documentId, request.documentHash, data.applicantId, data.applicantName, data.applicantOrganizationNumber, data.documentName, data.description, data.dateOfAccomplishment, data.tenure, data.percentage, data.outOfPercentage, "url");
-        
-        contract = network.getContract("applicant-asset-transfer");
-        await contract.submitTransaction('addDocumentIdToArray', data.applicantId, data.documentId)
-        return result;
+        // Build a network instance based on the channel where the smart contract is deployed
+        const network = await gateway.getNetwork(request.channelName);
+
+        let contract = network.getContract("applicant-asset-transfer");
+        let data = request.data;
+        let hasPermission = await contract.evaluateTransaction('hasPermission', data.applicantId);
+
+        if (hasPermission) {
+            // Get the contract from the network.
+            let contract = network.getContract('document-asset-transfer');
+
+            await contract.submitTransaction('createVerifiedDocument', data.documentId, request.documentHash, data.applicantId, data.applicantName, data.applicantOrganizationNumber, data.documentName, data.description, data.dateOfAccomplishment, data.tenure, data.percentage, data.outOfPercentage, "url");
+
+            contract = network.getContract("applicant-asset-transfer");
+            await contract.submitTransaction('addDocumentIdToArray', data.applicantId, data.documentId)
+            return { ok: true };
+        }
+        else {
+            throw new Error('Unauthorized Access');
+        }
+    } catch (error) {
+        return { ok: false, error: "Error in contract operation: " + error.message };
     }
-    else{
-        throw new Error('Unauthorized Access');
-    }
-    
+
+
 }
 
 exports.createSelfUploadedDocument = async (request) => {
-    let organization = request.organization;
-    let num = Number(organization.match(/\d/g).join(""));
-    const ccp = getCCP(num);
+    try {
+        let organization = request.organization;
+        let num = Number(organization.match(/\d/g).join(""));
+        const ccp = getCCP(num);
 
-    const wallet = await buildWallet(Wallets, walletPath);
+        const wallet = await buildWallet(Wallets, walletPath);
 
-    const gateway = new Gateway();
+        const gateway = new Gateway();
 
-    await gateway.connect(ccp, {
-        wallet,
-        identity: request.userId,
-        discovery: { enabled: true, asLocalhost: true } // using asLocalhost as this gateway is using a fabric network deployed locally
-    });
+        await gateway.connect(ccp, {
+            wallet,
+            identity: request.userId,
+            discovery: { enabled: true, asLocalhost: true } // using asLocalhost as this gateway is using a fabric network deployed locally
+        });
 
-    // Build a network instance based on the channel where the smart contract is deployed
-    const network = await gateway.getNetwork(request.channelName);
-   
-    let data = request.data;
+        // Build a network instance based on the channel where the smart contract is deployed
+        const network = await gateway.getNetwork(request.channelName);
 
-    // Get the contract from the network.
-    let contract = network.getContract('document-asset-transfer');
-    let result = await contract.submitTransaction('createSelfUploadedDocument', data.documentId, request.documentHash, request.userId, data.applicantName, data.applicantOrganizationNumber, data.organizationId, data.documentName, data.description, data.dateOfAccomplishment, data.tenure, data.percentage, data.outOfPercentage, "url");
+        let data = request.data;
 
-    contract = network.getContract("applicant-asset-transfer");
-    await contract.submitTransaction('addDocumentIdToArray', request.userId, data.documentId)
+        // Get the contract from the network.
+        let contract = network.getContract('document-asset-transfer');
+        await contract.submitTransaction('createSelfUploadedDocument', data.documentId, request.documentHash, request.userId, data.applicantName, data.applicantOrganizationNumber, data.organizationId, data.documentName, data.description, data.dateOfAccomplishment, data.tenure, data.percentage, data.outOfPercentage, "url");
 
-    return result;
+        contract = network.getContract("applicant-asset-transfer");
+        await contract.submitTransaction('addDocumentIdToArray', request.userId, data.documentId)
+
+        return { ok: true };
+    } catch (error) {
+        return { ok: false, error: "Error in contract operation: " + error.message };
+    }
 }
 
 
 exports.verifyDocument = async (request) => {
-    let org = request.org;
-    let num = Number(org.match(/\d/g).join(""));
-    const ccp = getCCP(num);
+    try {
+        let org = request.org;
+        let num = Number(org.match(/\d/g).join(""));
+        const ccp = getCCP(num);
 
-    const wallet = await buildWallet(Wallets, walletPath);
+        const wallet = await buildWallet(Wallets, walletPath);
 
-    const gateway = new Gateway();
+        const gateway = new Gateway();
 
-    await gateway.connect(ccp, {
-        wallet,
-        identity: request.userId,
-        discovery: { enabled: true, asLocalhost: true } // using asLocalhost as this gateway is using a fabric network deployed locally
-    });
+        await gateway.connect(ccp, {
+            wallet,
+            identity: request.userId,
+            discovery: { enabled: true, asLocalhost: true } // using asLocalhost as this gateway is using a fabric network deployed locally
+        });
 
-    // Build a network instance based on the channel where the smart contract is deployed
-    const network = await gateway.getNetwork(request.channelName);
+        // Build a network instance based on the channel where the smart contract is deployed
+        const network = await gateway.getNetwork(request.channelName);
 
-    // Get the contract from the network.
-    const contract = network.getContract(request.chaincodeName);
-    let data=request.data;
-    let result = await contract.submitTransaction('verifyDocument',data.documentId);
-    
-    return result;
+        // Get the contract from the network.
+        const contract = network.getContract(request.chaincodeName);
+        let data = request.data;
+        await contract.submitTransaction('verifyDocument', data.documentId);
+
+        return { ok: true };
+    } catch (error) {
+        return { ok: false, error: "Error in contract operation: " + error.message };
+    }
+
 }

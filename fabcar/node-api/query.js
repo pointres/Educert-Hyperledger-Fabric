@@ -14,7 +14,8 @@ const { BlobServiceClient, BlobSASPermissions } = require('@azure/storage-blob')
 //**************GET APPLICANT FUNCTIONS******************** */
 
 exports.getMyDetails = async (request) => {
-    let organization = request.organization;
+    try {
+        let organization = request.organization;
     let num = Number(organization.match(/\d/g).join(""));
     const ccp = getCCP(num);
     const wallet = await buildWallet(Wallets, walletPath);
@@ -33,11 +34,16 @@ exports.getMyDetails = async (request) => {
     const contract = network.getContract(request.chaincodeName);
 	
     let result = await contract.evaluateTransaction("getMyDetails");
-    return JSON.parse(result);
+        return { ok:true, data:JSON.parse(result) };
+    } catch (error) {
+        return { ok: false, error: "Error in contract operation: " + error.message };
+    }
+    
 }
 
 exports.getPermissionedApplicant = async (request) => {
-    let organization = request.organization;
+    try {
+        let organization = request.organization;
     let num = Number(organization.match(/\d/g).join(""));
     const ccp = getCCP(num);
 
@@ -55,7 +61,11 @@ exports.getPermissionedApplicant = async (request) => {
     const contract = network.getContract(request.chaincodeName);
     
     let result = await contract.submitTransaction('getPermissionedApplicant',request.data);
-    return result;
+    return { ok:true, data:result };
+    } catch (error) {
+        return { ok: false, error: "Error in contract operation: " + error.message };
+    }
+    
 }
 
 exports.getPermissionedApplicantHistory = async (request) => {
@@ -83,7 +93,8 @@ exports.getPermissionedApplicantHistory = async (request) => {
 }
 
 exports.getEnrolledApplicants = async (request) => {
-    let organization = request.organization;
+    try {
+        let organization = request.organization;
     let num = Number(organization.match(/\d/g).join(""));
     const ccp = getCCP(num);
 
@@ -99,11 +110,16 @@ exports.getEnrolledApplicants = async (request) => {
     const network = await gateway.getNetwork(request.channelName);
     const contract = network.getContract(request.chaincodeName);
     let result = await contract.submitTransaction('getEnrolledApplicants'); 
-    return result;
+    return {ok:true, data:result};
+    } catch (error) {
+        return { ok: false, error: "Error in contract operation: " + error.message };
+    }
+    
 }
 
 exports.getAllApplicantsOfOrganization = async (request) => {
-    let organization = request.organization;
+    try {
+        let organization = request.organization;
     let num = Number(organization.match(/\d/g).join(""));
     const ccp = getCCP(num);
 
@@ -119,12 +135,16 @@ exports.getAllApplicantsOfOrganization = async (request) => {
     const network = await gateway.getNetwork(request.channelName);
     const contract = network.getContract(request.chaincodeName);
     let result = await contract.submitTransaction('getAllApplicantsOfOrganization'); 
-    return result;
+    return {ok:true, data:result};
+    } catch (error) {
+        return { ok: false, error: "Error in contract operation: " + error.message };
+    }
 }
 
 
 exports.hasMyPermission = async (request) => {
-    let organization = request.organization;
+    try {
+        let organization = request.organization;
     let num = Number(organization.match(/\d/g).join(""));
     const ccp = getCCP(num);
 
@@ -144,7 +164,10 @@ exports.hasMyPermission = async (request) => {
     
     let result = await contract.evaluateTransaction('hasMyPermission',request.data.organizationId);
     
-    return result;
+    return {ok:true,data:result};
+    } catch (error) {
+        return { ok: false, error: "Error in contract operation: " + error.message };
+    }
 }
 
 
@@ -153,7 +176,8 @@ exports.hasMyPermission = async (request) => {
 
 
 exports.getDocumentsByApplicantId = async (request) => {
-    let organization = request.organization;
+    try {
+        let organization = request.organization;
     let num = Number(organization.match(/\d/g).join(""));
     const ccp = getCCP(num);
 
@@ -175,12 +199,14 @@ exports.getDocumentsByApplicantId = async (request) => {
         contract = network.getContract('document-asset-transfer');
         let result = await contract.evaluateTransaction('getDocumentsByApplicantId', request.data);
         putUrl(result);
-        return result;
+        return {ok:true, data:result};
     }
     else{
         throw new Error('Unauthorized Access');
     }
-    
+    } catch (error) {
+        return { ok: false, error: "Error in contract operation: " + error.message };
+    }    
 }
 
 const getDocumentUrls = async (applicantId, documentId) => {
@@ -223,7 +249,8 @@ const putUrl = async (docArray) => {
 }
 
 exports.getMyDocuments = async (request) => {
-    let organization = request.organization;
+    try {
+        let organization = request.organization;
     let num = Number(organization.match(/\d/g).join(""));
     const ccp = getCCP(num);
 
@@ -240,29 +267,38 @@ exports.getMyDocuments = async (request) => {
     const contract = network.getContract(request.chaincodeName);
     let result = await contract.evaluateTransaction('getMyDocuments');
     putUrl(request);
-    return result;    
+    return {ok:true, data:result};  
+    } catch (error) {
+        return { ok: false, error: "Error in contract operation: " + error.message };
+    }  
 }
 
 
 exports.getDocumentsSignedByOrganization = async (request) => {
-    let organization = request.organization;
-    let num = Number(organization.match(/\d/g).join(""));
-    const ccp = getCCP(num);
-    const wallet = await buildWallet(Wallets, walletPath);
-	
-    const gateway = new Gateway();
-    await gateway.connect(ccp, {
-        wallet,
-        identity:request.userId,
-        discovery: { enabled: true, asLocalhost: true }
-    });
-	
-    const network = await gateway.getNetwork(request.channelName);
-    const contract = network.getContract(request.chaincodeName);
-    let result = await contract.evaluateTransaction("getDocumentsSignedByOrganization");
-
-    result = putUrl(JSON.parse(result));
-    console.log(result);
-
-    return result;
+    try {
+        let organization = request.organization;
+        let num = Number(organization.match(/\d/g).join(""));
+        const ccp = getCCP(num);
+        const wallet = await buildWallet(Wallets, walletPath);
+        
+        const gateway = new Gateway();
+        await gateway.connect(ccp, {
+            wallet,
+            identity:request.userId,
+            discovery: { enabled: true, asLocalhost: true }
+        });
+        
+        const network = await gateway.getNetwork(request.channelName);
+        const contract = network.getContract(request.chaincodeName);
+        let result = await contract.evaluateTransaction("getDocumentsSignedByOrganization");
+    
+        result = putUrl(JSON.parse(result));
+        console.log(result);
+    
+        return {ok:true, data:result};
+    } catch (error) {
+        return { ok: false, error: "Error in contract operation: " + error.message };
+        
+    }
+   
 }
