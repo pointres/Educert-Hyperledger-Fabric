@@ -198,7 +198,7 @@ exports.getDocumentsByApplicantId = async (request) => {
     if(hasPermission){
         contract = network.getContract('document-asset-transfer');
         let result = await contract.evaluateTransaction('getDocumentsByApplicantId', request.data);
-        putUrl(result);
+        result = await putUrl(JSON.parse(result));
         return {ok:true, data:result};
     }
     else{
@@ -210,7 +210,6 @@ exports.getDocumentsByApplicantId = async (request) => {
 }
 
 const getDocumentUrls = async (applicantId, documentId) => {
-    let filename = applicantId;
     let blobServiceClient = BlobServiceClient.fromConnectionString(
         "DefaultEndpointsProtocol=https;AccountName=blockchainimagestore;AccountKey=qA3cp9TRxlCYqz7sTQPN0c/cKaDukEGepGRbjNOEPBWZHtVSalBaOpYIgaNQlrAMUrG8jRJwJYIDshYCN7GZGA==;EndpointSuffix=core.windows.net"
     );
@@ -248,6 +247,7 @@ const putUrl = async (docArray) => {
     return docArray;
 }
 
+// TODO
 exports.getMyDocuments = async (request) => {
     try {
         let organization = request.organization;
@@ -266,7 +266,7 @@ exports.getMyDocuments = async (request) => {
     const network = await gateway.getNetwork(request.channelName);
     const contract = network.getContract(request.chaincodeName);
     let result = await contract.evaluateTransaction('getMyDocuments');
-    putUrl(request);
+    result = await putUrl(JSON.parse(result))
     return {ok:true, data:result};  
     } catch (error) {
         return { ok: false, error: "Error in contract operation: " + error.message };
@@ -291,10 +291,10 @@ exports.getDocumentsSignedByOrganization = async (request) => {
         const network = await gateway.getNetwork(request.channelName);
         const contract = network.getContract(request.chaincodeName);
         let result = await contract.evaluateTransaction("getDocumentsSignedByOrganization");
-    
-        result = putUrl(JSON.parse(result));
         console.log(result);
-    
+        result = await putUrl(JSON.parse(result));
+        console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+        console.log(result);
         return {ok:true, data:result};
     } catch (error) {
         return { ok: false, error: "Error in contract operation: " + error.message };

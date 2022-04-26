@@ -728,11 +728,14 @@ app.post("/createSelfUploadedDocument",auth, async (req, res) => {
                 const fBuffer = fs.readFileSync(path.join(__dirname,"temp_image", filename));
                 let documentHash;
 
-                imageHash({data: fBuffer}, 16, true, (error, data) => {
-                        if(error) throw error;
-                        documentHash = data;
+                await imageHash
+                    .hash(fBuffer, 8, 'hex')
+                    .then((hash) => {
+                    documentHash = hash.hash; // '83c3d381c38985a5'
+                    console.log(documentHash);
+                    console.log(hash.type); // 'blockhash8'
                     });
-                
+
                 console.log(documentHash);
                 let details = JSON.parse(req.body.data);
                 let payload = {
@@ -740,17 +743,15 @@ app.post("/createSelfUploadedDocument",auth, async (req, res) => {
                     "channelName": channelName,
                     "chaincodeName": documentChaincode,
                     "userId": req.user.userId,
-                    "data":req.body.data,
+                    "data": details,
                     "documentHash":documentHash
                 }
                 console.log(req.uuid);
                 let result = await createSelfUploadedDocument(payload);
 
                 // console.log(req.files);
-                res.send(result);
-
-                createContainerAndUpload(temp.applicantId, filename, temp.documentId);
-                res.status(200).send(req.files);
+                createContainerAndUpload(req.user.userId, filename, details.documentId);
+                // res.status(200).send(req.files);
                 res.send(result);
                 // Everything went fine.
               });
