@@ -70,7 +70,7 @@ class ApplicantContract extends Contract {
 
 
     /* ****************RONAK START******************/
-    async updateApplicantPersonalDetails(ctx, args) {
+    async updateMyPersonalDetails(ctx, args) {
 
         if(await this.getUserRole(ctx) !== 'applicant'){
             return;
@@ -173,6 +173,7 @@ class ApplicantContract extends Contract {
         applicant.updatedBy = userIdentity;
         const buffer = Buffer.from(JSON.stringify(applicant));
         await ctx.stub.putState(applicantId, buffer);
+        return await this.getPermissionedApplicant(ctx, applicantId);
     }
 
     async grantAccessToOrganization(ctx, organizationId) {
@@ -247,7 +248,7 @@ class ApplicantContract extends Contract {
          return await this.getApplicant(ctx, await this.getUserIdentity(ctx));
     }
 
-    async getCurrentApplicantsEnrolled(ctx){
+    async getEnrolledApplicants(ctx){
         let role = await this.getUserRole(ctx);
         if(role !== 'viceAdmin'){
             return;
@@ -296,10 +297,6 @@ class ApplicantContract extends Contract {
 
         return permissionedAssets;
     }
-
-
-
-   
 
     async getPermissionedApplicantHistory(ctx, applicantId){
         let role = await this.getUserRole(ctx);

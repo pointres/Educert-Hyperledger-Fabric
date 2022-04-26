@@ -34,13 +34,13 @@ exports.createApplicant = async (request) => {
     const contract = network.getContract(request.chaincodeName);
     let data=request.body;
     console.log(data)
-    let result = await contract.submitTransaction('createApplicant',data.applicantId, data.email, data.password, data.fullName, data.address, data.pincode, data.stateOfApplicant, data.country, data.contactNumber, data.dob);
-    
-    return result;
+    await contract.submitTransaction('createApplicant',data.applicantId, data.email, data.password, data.fullName, data.address, data.pincode, data.stateOfApplicant, data.country, data.contactNumber, data.dob);
+
+
 }
 
 
-exports.updateApplicantPersonalDetails = async (request) => {
+exports.updateMyPersonalDetails = async (request) => {
 
     let organization = request.organization;
     let num = Number(organization.match(/\d/g).join(""));
@@ -63,9 +63,7 @@ exports.updateApplicantPersonalDetails = async (request) => {
     const contract = network.getContract(request.chaincodeName);
     let data = request.data;
    
-    let result = await contract.submitTransaction('updateApplicantPersonalDetails', JSON.stringify(data));
-    
-    return result;
+    await contract.submitTransaction('updateMyPersonalDetails', JSON.stringify(data));
 }
 
 exports.updateMyPassword = async (request) => {
@@ -305,43 +303,4 @@ exports.verifyDocument = async (request) => {
     let result = await contract.submitTransaction('verifyDocument',data.documentId);
     
     return result;
-}
-
-const getDocumentUrls = async (applicantId, documentId) => {
-    let filename = applicantId;
-    let blobServiceClient = BlobServiceClient.fromConnectionString(
-        "DefaultEndpointsProtocol=https;AccountName=blockchainimagestore;AccountKey=qA3cp9TRxlCYqz7sTQPN0c/cKaDukEGepGRbjNOEPBWZHtVSalBaOpYIgaNQlrAMUrG8jRJwJYIDshYCN7GZGA==;EndpointSuffix=core.windows.net"
-    );
-    // console.log(blobServiceClient.generateAccountSasUrl());
-    // const account = "blockchainimagestore";
-    // const sas = blobServiceClient.generateAccountSasUrl();
-
-    // StorageSharedKeyCredentialPolicy s = new StorageSharedKeyCredentialPolicy();
-
-
-    // blobServiceClient = new BlobServiceClient(`https://${account}.blob.core.windows.net${sas}`);
-    const containerClient = blobServiceClient.getContainerClient(applicantId);
-    const blobClient = containerClient.getBlobClient(documentId);
-    const sasOptions = {
-        containerName: containerClient.containerName,
-        blobName: documentId
-    };
-        sasOptions.startsOn = new Date();
-        sasOptions.expiresOn = new Date(new Date().valueOf() + 3600 * 1000);
-        sasOptions.permissions = BlobSASPermissions.parse("r");
-
-    //     sasOptions.identifier = storedPolicyName;
-    // }
-
-    let documentUrl = blobClient.generateSasUrl(sasOptions);
-    // blobClient.generateSasUrl();
-    
-    return documentUrl;
-}
-
-const putUrl = async (docArray) => {
-    for(let i = 0; i < docArray.length; i++){
-        docArray[i].documentUrl = await getDocumentUrls(docArray[i].applicantId, docArray[i].documentId);
-    }
-    return docArray;
 }

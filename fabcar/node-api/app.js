@@ -6,8 +6,8 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const bodyparser = require("body-parser");
 const { registerAdmin, registerUser, userExist } = require("./registerUser");
-const { createApplicant, verifyDocument,changeCurrentOrganization, grantAccessToOrganization, revokeAccessFromOrganization, createVerifiedDocument, createSelfUploadedDocument, updateApplicantPersonalDetails, updateMyPassword } =require('./tx')
-const { getMyDetails, getDocumentsSignedByOrganization, getPermissionedApplicant, getPermissionedApplicantHistory, getCurrentApplicantsEnrolled, getDocumentsByApplicantId, getMyDocuments , hasMyPermission , getAllApplicantsOfOrganization} =require('./query')
+const { createApplicant, verifyDocument,changeCurrentOrganization, grantAccessToOrganization, revokeAccessFromOrganization, createVerifiedDocument, createSelfUploadedDocument, updateMyPersonalDetails, updateMyPassword } =require('./tx')
+const { getMyDetails, getDocumentsSignedByOrganization, getPermissionedApplicant, getPermissionedApplicantHistory, getEnrolledApplicants, getDocumentsByApplicantId, getMyDocuments , hasMyPermission , getAllApplicantsOfOrganization} =require('./query')
 const {User, validateUser} = require('./models/user')
 const config_1 = require("config")
 // const { imageHash }= require('image-hash');
@@ -156,8 +156,8 @@ app.post("/registerApplicant", auth, async (req, res) => {
             req.channelName =  channelName;
             req.chaincodeName = applicantChaincode;
             req.body.password = user.password;
-            result = await createApplicant(req);
-            return res.send(result);
+            await createApplicant(req);
+            return res.send('Applicant Created Successfully');
         }
         else (
         res.status(500).send("Unauthorized Access!")
@@ -285,7 +285,7 @@ app.post("/getPermissionedApplicantHistory",auth, async (req, res) => {
 });
 
 
-app.post("/getCurrentApplicantsEnrolled",auth, async (req, res) => {
+app.post("/getEnrolledApplicants",auth, async (req, res) => {
     try {
         if(req.user.role === 'viceAdmin'){
             let payload = {
@@ -294,7 +294,7 @@ app.post("/getCurrentApplicantsEnrolled",auth, async (req, res) => {
                 "chaincodeName": applicantChaincode,
                 "userId": req.user.userId,
             }
-            let result = await getCurrentApplicantsEnrolled(payload);
+            let result = await getEnrolledApplicants(payload);
             res.send(result);
         }
         else{
@@ -399,7 +399,7 @@ app.post("/getDocumentsSignedByOrganization",auth, async (req, res) => {
 
 //**************APPLICANT POST FUNCTIONS******************** */
 
-app.post("/updateApplicantPersonalDetails", auth, async (req, res) => {
+app.post("/updateMyPersonalDetails", auth, async (req, res) => {
     try{
         if(req.user.role === 'applicant'){
             let payload = {
@@ -409,7 +409,7 @@ app.post("/updateApplicantPersonalDetails", auth, async (req, res) => {
                 "userId": req.user.userId,
                 "data": req.body.data
             }
-            let result = await updateApplicantPersonalDetails(payload);
+            let result = await updateMyPersonalDetails(payload);
             res.send(result);
         }
         else{

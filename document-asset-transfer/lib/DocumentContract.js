@@ -111,7 +111,7 @@ class DocumentContract extends Contract {
 
         const buffer = Buffer.from(JSON.stringify(document));
         await ctx.stub.putState(documentId, buffer);
-        return await this.getDocument(ctx, documentId);
+        // return await this.getDocument(ctx, documentId);
     }
 
     async getQueryResultForQueryString(ctx, queryString) {

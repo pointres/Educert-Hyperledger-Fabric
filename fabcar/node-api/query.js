@@ -82,7 +82,7 @@ exports.getPermissionedApplicantHistory = async (request) => {
     return result;
 }
 
-exports.getCurrentApplicantsEnrolled = async (request) => {
+exports.getEnrolledApplicants = async (request) => {
     let organization = request.organization;
     let num = Number(organization.match(/\d/g).join(""));
     const ccp = getCCP(num);
@@ -98,7 +98,7 @@ exports.getCurrentApplicantsEnrolled = async (request) => {
 
     const network = await gateway.getNetwork(request.channelName);
     const contract = network.getContract(request.chaincodeName);
-    let result = await contract.submitTransaction('getCurrentApplicantsEnrolled'); 
+    let result = await contract.submitTransaction('getEnrolledApplicants'); 
     return result;
 }
 
