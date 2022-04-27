@@ -6,7 +6,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const bodyparser = require("body-parser");
 const { registerAdmin, registerUser, userExist } = require("./registerUser");
-const { createApplicant, verifyDocument,changeCurrentOrganization, grantAccessToOrganization, revokeAccessFromOrganization, createVerifiedDocument, createSelfUploadedDocument, updateMyPersonalDetails, updateMyPassword } =require('./tx')
+const { createApplicant, fyDocument,changeCurrentOrganization, grantAccessToOrganization, revokeAccessFromOrganization, createVerifiedDocument, createSelfUploadedDocument, updateMyPersonalDetails, updateMyPassword } =require('./tx')
 const { getMyDetails, getDocumentsSignedByOrganization, getPermissionedApplicant, getPermissionedApplicantHistory, getEnrolledApplicants, getDocumentsByApplicantId, getMyDocuments , hasMyPermission , getAllApplicantsOfOrganization} =require('./query')
 const {User, validateUser} = require('./models/user')
 const config_1 = require("config")
@@ -750,9 +750,13 @@ app.post("/createSelfUploadedDocument",auth, async (req, res) => {
                 let result = await createSelfUploadedDocument(payload);
 
                 // console.log(req.files);
-                createContainerAndUpload(req.user.userId, filename, details.documentId);
+                if(result.ok){
+                    createContainerAndUpload(req.user.userId, filename, details.documentId);
+                    res.send("Created document");
+                }
                 // res.status(200).send(req.files);
-                res.send(result);
+                else
+                    res.status(500).send(result.error);
                 // Everything went fine.
               });
             //res.send(result);
@@ -765,7 +769,7 @@ app.post("/createSelfUploadedDocument",auth, async (req, res) => {
     }
 });
 
-app.post("/verifyDocument",auth, async (req, res) => {
+app.post("/fyDocument",auth, async (req, res) => {
     try {
         if(req.user.role === 'viceAdmin'){
             let payload = {
@@ -775,9 +779,9 @@ app.post("/verifyDocument",auth, async (req, res) => {
                 "userId": req.user.userId,
                 "data": req.body.data
             }
-            let result = await verifyDocument(payload);
+            let result = await fyDocument(payload);
             if(result.ok)
-                res.send(result.data);
+                res.send("Document fied successfully");
             else
                 res.status(500).send(result.error);
         }
