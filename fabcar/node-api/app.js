@@ -189,10 +189,10 @@ app.post("/login", async (req, res) => {
         else
             user = await User.findOne({ userId : userId, organization: organization, role: role });
             
-        if(!user) return res.status(400).send("Incorrect Username or Password");
+        if(!user) return res.status(400).send("Invalid Credentials");
 
         const validPassword = await bcrypt.compare(password, user.password );
-        if(!validPassword) return res.status(400).send("Incorrect Username or Password");
+        if(!validPassword) return res.status(400).send("Invalid Credentials");
 
         const token = jwt.sign({ userId: user.userId, organization : user.organization, role: user.role}, config_1.get('jwtPrivateKey'));
         console.log(token)

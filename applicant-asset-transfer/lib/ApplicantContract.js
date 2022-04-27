@@ -168,7 +168,7 @@ class ApplicantContract extends Contract {
             isDataChanged = true;
         }
 
-        if (isDataChanged === false) return;
+        if (isDataChanged === false) return await this.getPermissionedApplicant(ctx, applicantId);
 
         applicant.updatedBy = userIdentity;
         const buffer = Buffer.from(JSON.stringify(applicant));

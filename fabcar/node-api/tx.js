@@ -37,7 +37,7 @@ exports.createApplicant = async (request) => {
         await contract.submitTransaction('createApplicant', data.applicantId, data.email, data.password, data.fullName, data.address, data.pincode, data.stateOfApplicant, data.country, data.contactNumber, data.dob);
         return { ok: true }
     } catch (error) {
-        return { ok: false, error: "Error in contract operation: " + error.message };
+        return { ok: false, error: "Error  while Submitting" };
     }
 
 
@@ -70,7 +70,7 @@ exports.updateMyPersonalDetails = async (request) => {
         await contract.submitTransaction('updateMyPersonalDetails', JSON.stringify(data));
         return { ok: true }
     } catch (error) {
-        return { ok: false, error: "Error in contract operation: " + error.message };
+        return { ok: false, error: "Error  while Submitting" };
     }
 
 }
@@ -103,7 +103,7 @@ exports.updateMyPassword = async (request) => {
         return { ok: true }
 
     } catch (error) {
-        return { ok: false, error: "Error in contract operation: " + error.message };
+        return { ok: false, error: "Error  while Submitting" };
 
     }
 
@@ -136,7 +136,7 @@ exports.changeCurrentOrganization = async (request) => {
         return { ok: true, data: result };
 
     } catch (error) {
-        return { ok: false, error: "Error in contract operation: " + error.message };
+        return { ok: false, error: "Error  while Submitting" };
     }
 
 }
@@ -168,7 +168,7 @@ exports.grantAccessToOrganization = async (request) => {
         //result.mspids = mspids;
         return { ok: true };
     } catch (error) {
-        return { ok: false, error: "Error in contract operation: " + error.message };
+        return { ok: false, error: "Error  while Submitting" };
     }
 
 }
@@ -200,7 +200,7 @@ exports.revokeAccessFromOrganization = async (request) => {
 
         return { ok: true };
     } catch (error) {
-        return { ok: false, error: "Error in contract operation: " + error.message };
+        return { ok: false, error: "Error  while Submitting" };
     }
 
 }
@@ -274,7 +274,7 @@ exports.createVerifiedDocument = async (request) => {
             throw new Error('Unauthorized Access');
         }
     } catch (error) {
-        return { ok: false, error: "Error in contract operation: " + error.message };
+        return { ok: false, error: "Error  while Submitting" };
     }
 
 
@@ -310,7 +310,7 @@ exports.createSelfUploadedDocument = async (request) => {
 
         return { ok: true };
     } catch (error) {
-        return { ok: false, error: "Error in contract operation: " + error.message };
+        return { ok: false, error: "Error  while Submitting" };
     }
 }
 
@@ -341,7 +341,7 @@ exports.verifyDocument = async (request) => {
 
         return { ok: true };
     } catch (error) {
-        return { ok: false, error: "Error in contract operation: " + error.message };
+        return { ok: false, error: "Error  while Submitting" };
     }
 
 }
