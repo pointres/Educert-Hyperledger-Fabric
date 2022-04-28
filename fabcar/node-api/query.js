@@ -92,7 +92,7 @@ exports.getPermissionedApplicantHistory = async (request) => {
     return result;
 }
 
-exports.getEnrolledApplicants = async (request) => {
+exports.getCurrentlyEnrolledApplicants = async (request) => {
     try {
         let organization = request.organization;
     let num = Number(organization.match(/\d/g).join(""));
@@ -109,7 +109,7 @@ exports.getEnrolledApplicants = async (request) => {
 
     const network = await gateway.getNetwork(request.channelName);
     const contract = network.getContract(request.chaincodeName);
-    let result = await contract.submitTransaction('getEnrolledApplicants'); 
+    let result = await contract.submitTransaction('getCurrentlyEnrolledApplicants'); 
     return {ok:true, data:result};
     } catch (error) {
         return { ok: false, error: "Error in contract operation: " + error.message };

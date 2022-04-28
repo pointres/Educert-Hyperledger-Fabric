@@ -248,7 +248,7 @@ class ApplicantContract extends Contract {
          return await this.getApplicant(ctx, await this.getUserIdentity(ctx));
     }
 
-    async getEnrolledApplicants(ctx){
+    async getCurrentlyEnrolledApplicants(ctx){
         let role = await this.getUserRole(ctx);
         if(role !== 'viceAdmin'){
             return;

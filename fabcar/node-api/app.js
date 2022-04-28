@@ -7,7 +7,7 @@ const jwt = require('jsonwebtoken');
 const bodyparser = require("body-parser");
 const { registerAdmin, registerUser, userExist } = require("./registerUser");
 const { createApplicant, fyDocument,changeCurrentOrganization, grantAccessToOrganization, revokeAccessFromOrganization, createVerifiedDocument, createSelfUploadedDocument, updateMyPersonalDetails, updateMyPassword } =require('./tx')
-const { getMyDetails, getDocumentsSignedByOrganization, getPermissionedApplicant, getPermissionedApplicantHistory, getEnrolledApplicants, getDocumentsByApplicantId, getMyDocuments , hasMyPermission , getAllApplicantsOfOrganization} =require('./query')
+const { getMyDetails, getDocumentsSignedByOrganization, getPermissionedApplicant, getPermissionedApplicantHistory, getCurrentlyEnrolledApplicants, getDocumentsByApplicantId, getMyDocuments , hasMyPermission , getAllApplicantsOfOrganization} =require('./query')
 const {User, validateUser} = require('./models/user')
 const config_1 = require("config")
 // const { imageHash }= require('image-hash');
@@ -294,7 +294,7 @@ app.post("/getPermissionedApplicantHistory",auth, async (req, res) => {
 });
 
 
-app.post("/getEnrolledApplicants",auth, async (req, res) => {
+app.post("/getCurrentlyEnrolledApplicants",auth, async (req, res) => {
     try {
         if(req.user.role === 'viceAdmin'){
             let payload = {
@@ -303,7 +303,7 @@ app.post("/getEnrolledApplicants",auth, async (req, res) => {
                 "chaincodeName": applicantChaincode,
                 "userId": req.user.userId,
             }
-            let result = await getEnrolledApplicants(payload);
+            let result = await getCurrentlyEnrolledApplicants(payload);
             if(result.ok)
                 res.send(result.data);
             else
