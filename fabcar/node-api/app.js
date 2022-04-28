@@ -179,14 +179,27 @@ app.post("/login", async (req, res) => {
             organization, role, userId, password
         }
         */
+
+        
+            // user = await User.findOne({ userId : userId });
+            /*let payload = {
+                "organization": req.user.organization,
+                "channelName": channelName,
+                "chaincodeName": applicantChaincode,
+                "userId": userId
+            }
+            let result = await getMyDetails(payload);
+            if(result.ok)
+                res.send(result.data);
+            else
+                res.status(500).send(result.error);*/
+        
         let { userId, password, organization } = req.body;
         const {error} = validateUser(req.body);
         if(error) return res.status(400).send(error.details[0].message);
 
-        let user = {};
-        if(role === 'applicant')
-            user = await User.findOne({ userId : userId });
-        else
+        let user = await User.findOne({ userId : userId });
+        if(user.role !== 'applicant')
             user = await User.findOne({ userId : userId, organization: organization });
             
         if(!user) return res.status(400).send("Invalid Credentials");

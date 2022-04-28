@@ -132,6 +132,11 @@ class ApplicantContract extends Contract {
     }
 
 
+    async getMyPassword(ctx){
+        let applicantId = await this.getUserIdentity(ctx);
+        const applicant = await this.getApplicant(ctx, applicantId);
+        return applicant.password;
+    }
 
     async updateMyPassword(ctx, password) {
         let applicantId = await this.getUserIdentity(ctx)
