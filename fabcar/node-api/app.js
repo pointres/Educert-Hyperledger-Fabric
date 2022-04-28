@@ -179,15 +179,15 @@ app.post("/login", async (req, res) => {
             organization, role, userId, password
         }
         */
-        let { userId, password, organization, role } = req.body;
+        let { userId, password, organization } = req.body;
         const {error} = validateUser(req.body);
         if(error) return res.status(400).send(error.details[0].message);
 
         let user = {};
         if(role === 'applicant')
-            user = await User.findOne({ userId : userId, role: role });
+            user = await User.findOne({ userId : userId });
         else
-            user = await User.findOne({ userId : userId, organization: organization, role: role });
+            user = await User.findOne({ userId : userId, organization: organization });
             
         if(!user) return res.status(400).send("Invalid Credentials");
 
@@ -195,7 +195,6 @@ app.post("/login", async (req, res) => {
         if(!validPassword) return res.status(400).send("Invalid Credentials");
 
         const token = jwt.sign({ userId: user.userId, organization : user.organization, role: user.role}, config_1.get('jwtPrivateKey'));
-        console.log(token)
         res.header('x-auth-token', token).send(token);
 
     } 
