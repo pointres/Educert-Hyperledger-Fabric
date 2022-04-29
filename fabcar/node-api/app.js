@@ -95,7 +95,7 @@ app.post("/registerViceAdmin", auth, async (req, res) => {
             let {userId, password} = req.body;
             req.body.organization = req.user.organization;
             console.log(req.body.organization)
-            req.body.role = 'viceAdmin';
+            // req.body.role = 'viceAdmin';
             const {error} = validateUser(req.body);
             if(error) return res.status(400).send(error.details[0].message);
 
@@ -130,13 +130,13 @@ app.post("/registerApplicant", auth, async (req, res) => {
             let applicantId = req.body.applicantId;
             let password = req.body.password = "Secure@2022";
             let organization = req.user.organization;
-            let role = req.body.role = "applicant";
+            let role = "applicant";
             //generate certif
             console.log(req.body)
             await registerUser({ OrgMSP: organization, userId: applicantId, role});
             
             //register applicant in mongo
-            const {error} = validateUser({userId:applicantId, password, organization, role});
+            const {error} = validateUser({userId:applicantId, password, organization});
             if(error) return res.status(400).send(error.details[0].message);
 
             let user = await User.findOne({ userId : applicantId, organization: organization, role: role });

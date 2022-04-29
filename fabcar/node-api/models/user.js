@@ -38,7 +38,7 @@ function validateUser(user) {
         userId: Joi.string().min(5).max(255).required(),
         password: Joi.string().min(5).max(1024).required(),
         organization: Joi.string().min(1).max(1024).required(),
-        role: Joi.string().min(2).max(10).required()
+        // role: Joi.string().min(2).max(10).required()
     });
     return schema.validate(user);
 }
