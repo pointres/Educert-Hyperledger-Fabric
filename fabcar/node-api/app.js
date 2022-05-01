@@ -793,7 +793,7 @@ app.post("/verifyDocument",auth, async (req, res) => {
             }
             let result = await verifyDocument(payload);
             if(result.ok)
-                res.send("Document fied successfully");
+                res.send("Document verified successfully");
             else
                 res.status(500).send(result.error);
         }
