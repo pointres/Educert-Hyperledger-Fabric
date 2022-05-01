@@ -208,6 +208,8 @@ class ApplicantContract extends Contract {
 
         let applicantId = await this.getUserIdentity(ctx);
         const applicant = await this.getApplicant(ctx, applicantId);
+        if(applicant.currentOrganization === organizationId)
+            applicant.currentOrganization = "";
         // Remove the organization if existing
         if (applicant.permissionGranted.includes(organizationId)) {
             applicant.permissionGranted = applicant.permissionGranted.filter(organization => organization !== organizationId);
