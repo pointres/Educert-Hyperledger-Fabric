@@ -5,8 +5,8 @@ const walletPath = path.join(__dirname, "wallet");
 const { buildWallet } = require('./AppUtils')
 
 const { BlobServiceClient, BlobSASPermissions } = require('@azure/storage-blob');
-
-
+const { hash } = require("bcrypt");
+const imageHash = require('node-image-hash');
 
 //**************GET FUNCTIONS***************** */
 
@@ -242,7 +242,24 @@ const getDocumentUrls = async (applicantId, documentId) => {
 
 const putUrl = async (docArray) => {
     for(let i = 0; i < docArray.length; i++){
-        docArray[i].documentUrl = await getDocumentUrls(docArray[i].applicantId, docArray[i].documentId);
+        let url = await getDocumentUrls(docArray[i].applicantId, docArray[i].documentId);
+
+        let documentHash;
+        await imageHash
+            .hash(url, 8, 'hex')
+            .then((hash) => {
+            documentHash = hash.hash; // '83c3d381c38985a5'
+            console.log(documentHash);
+            console.log(hash.type); // 'blockhash8'
+        });
+        if(documentHash === docArray[i].documentHash){
+            console.log("if");
+            docArray[i].documentUrl = url;
+        }
+        else{
+            console.log("else")
+            docArray[i].documentUrl = "";
+        }
     }
     return docArray;
 }
