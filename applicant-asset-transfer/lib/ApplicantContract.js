@@ -367,9 +367,15 @@ class ApplicantContract extends Contract {
     }
 
     async getOrganization(ctx){
-        let identity = await this.getIdentity(ctx);
-        identity = identity.split('/')[1].split('=');
-        return identity[1].toString('utf8');
+        // let identity = await this.getIdentity(ctx);
+        // identity = identity.split('/')[1].split('=');
+        // return identity[1].toString('utf8');
+        
+        const ClientIdentity = require('fabric-shim').ClientIdentity;
+        let cid = new ClientIdentity(ctx.stub);
+
+        let msp = cid.getMSPID();
+        return msp.slice(0, msp.length - 3);
     }
 
     async getUserIdentity(ctx){
