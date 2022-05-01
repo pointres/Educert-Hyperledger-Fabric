@@ -377,7 +377,7 @@ class ApplicantContract extends Contract {
         let cid = new ClientIdentity(ctx.stub);
 
         let msp = cid.getMSPID();
-        return msp.slice(0, msp.length - 3);
+        return msp.toLowerCase().slice(0, msp.length - 3);
     }
 
     async getUserIdentity(ctx){
